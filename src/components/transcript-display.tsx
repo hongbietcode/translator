@@ -19,7 +19,9 @@ export function TranscriptDisplay({
   isListening,
 }: TranscriptDisplayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [settledIds, setSettledIds] = useState<Set<number>>(new Set());
+  const [settledIds, setSettledIds] = useState<Set<number>>(
+    () => new Set(segments.filter((s) => s.status === "translated").map((s) => s.createdAt)),
+  );
   const [isAtBottom, setIsAtBottom] = useState(true);
   const userScrolledRef = useRef(false);
   const hasContent = segments.length > 0 || provisionalText;
