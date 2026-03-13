@@ -14,11 +14,11 @@ interface TitlebarProps {
   onClose: () => void;
 }
 
-const STATUS_CONFIG: Record<SonioxStatus, { className: string; label: string }> = {
-  disconnected: { className: "bg-muted-foreground", label: "Ready" },
-  connecting: { className: "bg-warning animate-[pulse-dot_1.5s_infinite]", label: "Connecting..." },
-  connected: { className: "bg-success shadow-[0_0_5px_rgba(22,163,74,0.4)]", label: "Listening" },
-  error: { className: "bg-destructive shadow-[0_0_5px_rgba(220,38,38,0.35)]", label: "Error" },
+const STATUS_CONFIG: Record<SonioxStatus, { dotClass: string; label: string }> = {
+  disconnected: { dotClass: "status-dot status-dot--disconnected", label: "Ready" },
+  connecting: { dotClass: "status-dot status-dot--connecting", label: "Connecting..." },
+  connected: { dotClass: "status-dot status-dot--connected", label: "Listening" },
+  error: { dotClass: "status-dot status-dot--error", label: "Error" },
 };
 
 export function Titlebar({
@@ -36,20 +36,15 @@ export function Titlebar({
   const statusCfg = STATUS_CONFIG[status];
 
   return (
-    <div
-      className="flex h-10 shrink-0 items-center gap-1 border-b border-border bg-muted px-2"
-      data-tauri-drag-region
-    >
-      <div className="flex items-center gap-1 px-1 pointer-events-none" data-tauri-drag-region>
-        <span className={`size-2 rounded-full shrink-0 transition-colors duration-250 ${statusCfg.className}`} />
-        <span className="text-xs font-medium text-muted-foreground tracking-wide">
-          {statusCfg.label}
-        </span>
+    <div className="titlebar" data-tauri-drag-region>
+      <div className="titlebar-status" data-tauri-drag-region>
+        <span className={statusCfg.dotClass} />
+        <span className="status-label">{statusCfg.label}</span>
       </div>
 
-      <div className="flex-1 min-w-0" data-tauri-drag-region />
+      <div className="titlebar-spacer" data-tauri-drag-region />
 
-      <div className="flex items-center gap-1 [&_button]:[-webkit-app-region:no-drag]">
+      <div className="titlebar-actions">
         <SourceSelector
           currentSource={currentSource}
           currentDevice={currentDevice}
@@ -58,11 +53,7 @@ export function Titlebar({
 
         <button
           onClick={onToggle}
-          className={`flex items-center gap-1 h-7 px-3 border-none rounded-md text-white cursor-pointer text-xs font-semibold transition-all duration-150 ${
-            isRunning
-              ? "bg-destructive animate-[record-glow_2s_infinite] hover:bg-[#b91c1c]"
-              : "bg-accent hover:bg-accent-dark hover:shadow-[0_2px_10px_rgba(59,130,246,0.3)]"
-          }`}
+          className={`btn-toggle ${isRunning ? "btn-toggle--stop" : "btn-toggle--start"}`}
         >
           {isRunning ? (
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -76,7 +67,7 @@ export function Titlebar({
           <span>{isRunning ? "Stop" : "Start"}</span>
         </button>
 
-        <div className="w-px h-4 bg-border mx-0.5" />
+        <div className="titlebar-divider" />
 
         <IconButton title="History (⌘H)" onClick={onHistory}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -101,7 +92,7 @@ export function Titlebar({
           </svg>
         </IconButton>
 
-        <IconButton title="Close" onClick={onClose} className="hover:bg-destructive/5 hover:text-destructive">
+        <IconButton title="Close" onClick={onClose} className="icon-btn--close">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -127,7 +118,7 @@ function IconButton({
     <button
       title={title}
       onClick={onClick}
-      className={`flex items-center justify-center size-8 border-none rounded-md bg-transparent text-muted-foreground cursor-pointer transition-all duration-150 hover:bg-accent/5 hover:text-foreground active:scale-90 ${className}`}
+      className={`icon-btn ${className}`}
     >
       {children}
     </button>

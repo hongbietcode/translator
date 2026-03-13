@@ -55,15 +55,12 @@ export function SourceSelector({ currentSource, currentDevice, onSelect }: Sourc
     );
 
   return (
-    <div className="relative" ref={containerRef}>
-      <button
-        onClick={handleOpen}
-        className="flex items-center gap-1 h-7 px-2 border border-border rounded-md bg-background text-text-2 cursor-pointer text-xs font-medium transition-all duration-150 whitespace-nowrap max-w-32 hover:border-accent hover:text-foreground hover:bg-accent/5"
-      >
+    <div className="source-selector" ref={containerRef}>
+      <button onClick={handleOpen} className="source-btn">
         {sourceIcon}
-        <span className="flex-1 overflow-hidden text-ellipsis max-w-20">{sourceLabel}</span>
+        <span className="source-btn-label">{sourceLabel}</span>
         <svg
-          className={`shrink-0 opacity-45 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+          className={`source-chevron ${open ? "source-chevron--open" : ""}`}
           width="8"
           height="8"
           viewBox="0 0 24 24"
@@ -76,7 +73,7 @@ export function SourceSelector({ currentSource, currentDevice, onSelect }: Sourc
       </button>
 
       {open && (
-        <div className="absolute top-[calc(100%+4px)] right-0 min-w-52 bg-background border border-border rounded-xl shadow-lg p-1 z-50 animate-[fade-in-up_0.12s_ease-out]">
+        <div className="source-dropdown">
           <SourceOption
             icon={
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -92,16 +89,12 @@ export function SourceSelector({ currentSource, currentDevice, onSelect }: Sourc
             }}
           />
 
-          <div className="h-px bg-border my-1" />
+          <div className="source-divider" />
 
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1">
-            Microphone
-          </div>
+          <div className="source-section-label">Microphone</div>
 
           {devices.length === 0 ? (
-            <div className="px-2 py-2 text-xs text-muted-foreground cursor-default">
-              No microphone found
-            </div>
+            <div className="source-empty">No microphone found</div>
           ) : (
             devices.map((device) => (
               <SourceOption
@@ -141,11 +134,7 @@ function SourceOption({
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer text-xs transition-all duration-150 ${
-        active
-          ? "bg-accent-glow text-accent"
-          : "text-text-2 hover:bg-accent/5 hover:text-foreground"
-      }`}
+      className={`source-option ${active ? "source-option--active" : "source-option--inactive"}`}
     >
       {icon}
       <span>{label}</span>

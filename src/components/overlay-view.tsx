@@ -39,10 +39,7 @@ export function OverlayView({
   onClose,
 }: OverlayViewProps) {
   return (
-    <div
-      className="flex h-full w-full flex-col rounded-2xl border border-border bg-background shadow-lg overflow-hidden animate-[fade-in-up_250ms_ease-out]"
-      style={{ opacity }}
-    >
+    <div className="view-shell" style={{ opacity }}>
       <Titlebar
         status={status}
         isRunning={isRunning}
@@ -64,8 +61,8 @@ export function OverlayView({
         isListening={isRunning && segments.length === 0 && !provisionalText}
       />
 
-      <div className="h-1.5 cursor-ns-resize bg-transparent flex items-center justify-center shrink-0 [-webkit-app-region:no-drag]">
-        <div className="w-9 h-0.5 rounded-sm bg-border transition-colors hover:bg-muted-foreground" />
+      <div className="overlay-resize">
+        <div className="overlay-resize-bar" />
       </div>
     </div>
   );

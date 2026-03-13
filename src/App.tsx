@@ -139,17 +139,20 @@ export default function App() {
     soniox.clearSegments();
   }, [soniox]);
 
-  const handleExport = useCallback(() => {
-    const text = history.exportText();
-    if (!text) {
-      showToast("No history to export", "info");
-      return;
-    }
-    navigator.clipboard
-      .writeText(text)
-      .then(() => showToast("Copied to clipboard", "success"))
-      .catch(() => showToast("Failed to copy", "error"));
-  }, [history]);
+  const handleExportSession = useCallback(
+    (sessionId: number) => {
+      const text = history.exportSession(sessionId);
+      if (!text) {
+        showToast("No content to export", "info");
+        return;
+      }
+      navigator.clipboard
+        .writeText(text)
+        .then(() => showToast("Copied to clipboard", "success"))
+        .catch(() => showToast("Failed to copy", "error"));
+    },
+    [history],
+  );
 
   const handleClearHistory = useCallback(() => {
     history.clear();
@@ -166,12 +169,12 @@ export default function App() {
         case "source-system": handleSourceChange("system", null); break;
         case "source-mic": handleSourceChange("microphone", null); break;
         case "source-both": handleSourceChange("both", null); break;
-        case "export": handleExport(); break;
+        case "export": break;
         case "clear-history": handleClearHistory(); break;
       }
     });
     return () => { unlisten.then((fn) => fn()); };
-  }, [toggle, handleSourceChange, handleExport, handleClearHistory]);
+  }, [toggle, handleSourceChange, handleClearHistory]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -224,7 +227,7 @@ export default function App() {
         <HistoryView
           sessions={history.sessions}
           onBack={() => setCurrentView("overlay")}
-          onExport={handleExport}
+          onExportSession={handleExportSession}
           onClear={handleClearHistory}
         />
       )}
