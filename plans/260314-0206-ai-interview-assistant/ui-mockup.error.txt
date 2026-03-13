@@ -1,0 +1,8 @@
+# Batch Processing Results
+
+## 1. generated
+
+**Status**: error
+
+**Error**: [Errno 61] Connection refused
+

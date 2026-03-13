@@ -6,12 +6,14 @@ interface TitlebarProps {
   isRunning: boolean;
   currentSource: string;
   currentDevice: string | null;
+  aiEnabled: boolean;
   onToggle: () => void;
   onSourceChange: (source: string, device: string | null) => void;
   onSettings: () => void;
   onHistory: () => void;
   onClear: () => void;
   onClose: () => void;
+  onToggleAi: () => void;
 }
 
 const STATUS_CONFIG: Record<SonioxStatus, { dotClass: string; label: string }> = {
@@ -26,12 +28,14 @@ export function Titlebar({
   isRunning,
   currentSource,
   currentDevice,
+  aiEnabled,
   onToggle,
   onSourceChange,
   onSettings,
   onHistory,
   onClear,
   onClose,
+  onToggleAi,
 }: TitlebarProps) {
   const statusCfg = STATUS_CONFIG[status];
 
@@ -68,6 +72,12 @@ export function Titlebar({
         </button>
 
         <div className="titlebar-divider" />
+
+        <IconButton title="AI Assistant" onClick={onToggleAi} className={aiEnabled ? "icon-btn--active" : ""}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+          </svg>
+        </IconButton>
 
         <IconButton title="History (⌘H)" onClick={onHistory}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

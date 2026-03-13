@@ -37,6 +37,10 @@ export function SettingsView({ settings, onSave, onBack, onToast }: SettingsView
   const [showOriginal, setShowOriginal] = useState(true);
   const [contextDomain, setContextDomain] = useState("");
   const [contextTerms, setContextTerms] = useState("");
+  const [anthropicKey, setAnthropicKey] = useState("");
+  const [showAnthropicKey, setShowAnthropicKey] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [aiModel, setAiModel] = useState("claude-haiku-4-5-20251001");
 
   useEffect(() => {
     setApiKey(settings.soniox_api_key || "");
@@ -49,6 +53,9 @@ export function SettingsView({ settings, onSave, onBack, onToast }: SettingsView
     setShowOriginal(settings.show_original !== false);
     setContextDomain(settings.custom_context?.domain || "");
     setContextTerms((settings.custom_context?.terms || []).join(", "));
+    setAnthropicKey(settings.anthropic_api_key || "");
+    setAiEnabled(settings.ai_enabled || false);
+    setAiModel(settings.ai_model || "claude-haiku-4-5-20251001");
   }, [settings]);
 
   const handleSave = async () => {
@@ -62,6 +69,9 @@ export function SettingsView({ settings, onSave, onBack, onToast }: SettingsView
       max_lines: maxLines,
       show_original: showOriginal,
       custom_context: null,
+      anthropic_api_key: anthropicKey.trim(),
+      ai_enabled: aiEnabled,
+      ai_model: aiModel,
     };
 
     const domain = contextDomain.trim();
@@ -269,6 +279,68 @@ export function SettingsView({ settings, onSave, onBack, onToast }: SettingsView
           <p className="s-hint">Comma-separated terms to improve accuracy</p>
         </div>
 
+        <div className="s-card">
+          <div className="s-card-header">
+            <SparkleIcon />
+            <span>AI Assistant</span>
+          </div>
+          <label className="s-toggle-row">
+            <span>Enable AI Assistant</span>
+            <div className={`s-switch ${aiEnabled ? "s-switch--on" : ""}`} onClick={() => setAiEnabled(!aiEnabled)}>
+              <div className="s-switch-thumb" />
+            </div>
+          </label>
+          <div className="s-field" style={{ marginTop: 8 }}>
+            <span className="s-field-label">Anthropic API Key</span>
+            <div className="s-key-row">
+              <input
+                type={showAnthropicKey ? "text" : "password"}
+                value={anthropicKey}
+                onChange={(e) => setAnthropicKey(e.target.value)}
+                placeholder="Enter your Anthropic API key..."
+                className="input-field"
+                autoComplete="off"
+              />
+              <button onClick={() => setShowAnthropicKey(!showAnthropicKey)} className="s-icon-btn" title="Show/Hide">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  {showAnthropicKey ? (
+                    <>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </div>
+            <p className="s-hint">
+              Get your key at{" "}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openUrl("https://console.anthropic.com/");
+                }}
+              >
+                console.anthropic.com
+              </a>
+            </p>
+          </div>
+          <div className="s-field" style={{ marginTop: 8 }}>
+            <span className="s-field-label">Model</span>
+            <select value={aiModel} onChange={(e) => setAiModel(e.target.value)} className="select-field">
+              <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (Fast)</option>
+              <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (Balanced)</option>
+              <option value="claude-opus-4-6">Claude Opus 4.6 (Best)</option>
+            </select>
+          </div>
+        </div>
+
         <button onClick={handleSave} className="btn-save">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="20 6 9 17 4 12" />
@@ -332,6 +404,14 @@ function MonitorIcon() {
       <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
       <line x1="8" y1="21" x2="16" y2="21" />
       <line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  );
+}
+
+function SparkleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
     </svg>
   );
 }

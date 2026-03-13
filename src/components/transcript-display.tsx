@@ -10,6 +10,8 @@ interface TranscriptDisplayProps {
   provisionalText: string;
   fontSize: number;
   isListening: boolean;
+  aiEnabled?: boolean;
+  onAskAi?: (segmentIndex: number) => void;
 }
 
 export function TranscriptDisplay({
@@ -17,6 +19,8 @@ export function TranscriptDisplay({
   provisionalText,
   fontSize,
   isListening,
+  aiEnabled,
+  onAskAi,
 }: TranscriptDisplayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [settledIds, setSettledIds] = useState<Set<number>>(
@@ -161,6 +165,21 @@ export function TranscriptDisplay({
                   </span>,
                 );
               }
+            }
+
+            if (aiEnabled && seg.status === "translated" && seg.translation && onAskAi) {
+              nodes.push(
+                <button
+                  key={`ai-${i}`}
+                  className="ask-ai-btn"
+                  onClick={() => onAskAi(i)}
+                  title="Ask AI about this"
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+                  </svg>
+                </button>,
+              );
             }
 
             return nodes;

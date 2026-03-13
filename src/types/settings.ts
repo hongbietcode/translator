@@ -13,6 +13,9 @@ export interface Settings {
   max_lines: number;
   show_original: boolean;
   custom_context: CustomContext | null;
+  anthropic_api_key: string;
+  ai_enabled: boolean;
+  ai_model: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -25,4 +28,7 @@ export const DEFAULT_SETTINGS: Settings = {
   max_lines: 5,
   show_original: true,
   custom_context: null,
+  anthropic_api_key: "",
+  ai_enabled: false,
+  ai_model: "claude-haiku-4-5-20251001",
 };

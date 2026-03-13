@@ -1,7 +1,9 @@
 import type { SonioxStatus } from "@/lib/soniox-websocket-client";
 import type { TranscriptSegment } from "@/hooks/use-soniox";
+import type { AiMessage } from "@/hooks/use-ai-service";
 import { Titlebar } from "./titlebar";
 import { TranscriptDisplay } from "./transcript-display";
+import { AiAssistantPanel } from "./ai-assistant-panel";
 
 interface OverlayViewProps {
   status: SonioxStatus;
@@ -12,12 +14,21 @@ interface OverlayViewProps {
   provisionalText: string;
   fontSize: number;
   opacity: number;
+  aiEnabled: boolean;
+  aiMessages: AiMessage[];
+  aiStreaming: boolean;
+  aiConfigured: boolean;
   onToggle: () => void;
   onSourceChange: (source: string, device: string | null) => void;
   onSettings: () => void;
   onHistory: () => void;
   onClear: () => void;
   onClose: () => void;
+  onToggleAi: () => void;
+  onAskAi: (segmentIndex: number) => void;
+  onAiSend: (question: string) => void;
+  onAiStop: () => void;
+  onAiClear: () => void;
 }
 
 export function OverlayView({
@@ -29,12 +40,21 @@ export function OverlayView({
   provisionalText,
   fontSize,
   opacity,
+  aiEnabled,
+  aiMessages,
+  aiStreaming,
+  aiConfigured,
   onToggle,
   onSourceChange,
   onSettings,
   onHistory,
   onClear,
   onClose,
+  onToggleAi,
+  onAskAi,
+  onAiSend,
+  onAiStop,
+  onAiClear,
 }: OverlayViewProps) {
   return (
     <div className="view-shell" style={{ opacity }}>
@@ -43,20 +63,37 @@ export function OverlayView({
         isRunning={isRunning}
         currentSource={currentSource}
         currentDevice={currentDevice}
+        aiEnabled={aiEnabled}
         onToggle={onToggle}
         onSourceChange={onSourceChange}
         onSettings={onSettings}
         onHistory={onHistory}
         onClear={onClear}
         onClose={onClose}
+        onToggleAi={onToggleAi}
       />
 
-      <TranscriptDisplay
-        segments={segments}
-        provisionalText={provisionalText}
-        fontSize={fontSize}
-        isListening={isRunning && segments.length === 0 && !provisionalText}
-      />
+      <div className={`overlay-content ${aiEnabled ? "overlay-content--split" : ""}`}>
+        <TranscriptDisplay
+          segments={segments}
+          provisionalText={provisionalText}
+          fontSize={fontSize}
+          isListening={isRunning && segments.length === 0 && !provisionalText}
+          aiEnabled={aiEnabled}
+          onAskAi={onAskAi}
+        />
+
+        {aiEnabled && (
+          <AiAssistantPanel
+            messages={aiMessages}
+            isStreaming={aiStreaming}
+            isConfigured={aiConfigured}
+            onSend={onAiSend}
+            onStop={onAiStop}
+            onClear={onAiClear}
+          />
+        )}
+      </div>
 
       <div className="overlay-resize">
         <div className="overlay-resize-bar" />

@@ -31,6 +31,19 @@ pub struct Settings {
     pub show_original: bool,
     /// Optional custom context for better transcription
     pub custom_context: Option<CustomContext>,
+    /// Anthropic API key for AI assistant
+    #[serde(default)]
+    pub anthropic_api_key: String,
+    /// Whether AI assistant is enabled
+    #[serde(default)]
+    pub ai_enabled: bool,
+    /// AI model to use
+    #[serde(default = "default_ai_model")]
+    pub ai_model: String,
+}
+
+fn default_ai_model() -> String {
+    "claude-haiku-4-5-20251001".to_string()
 }
 
 impl Default for Settings {
@@ -45,6 +58,9 @@ impl Default for Settings {
             max_lines: 5,
             show_original: true,
             custom_context: None,
+            anthropic_api_key: String::new(),
+            ai_enabled: false,
+            ai_model: default_ai_model(),
         }
     }
 }
