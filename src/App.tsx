@@ -204,7 +204,6 @@ export default function App() {
           currentDevice={currentDevice}
           segments={soniox.segments}
           provisionalText={soniox.provisionalText}
-          provisionalSpeaker={soniox.provisionalSpeaker}
           fontSize={settings.font_size}
           opacity={settings.overlay_opacity}
           onToggle={toggle}

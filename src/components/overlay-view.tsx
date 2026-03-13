@@ -10,7 +10,6 @@ interface OverlayViewProps {
   currentDevice: string | null;
   segments: TranscriptSegment[];
   provisionalText: string;
-  provisionalSpeaker: number | null;
   fontSize: number;
   opacity: number;
   onToggle: () => void;
@@ -28,7 +27,6 @@ export function OverlayView({
   currentDevice,
   segments,
   provisionalText,
-  provisionalSpeaker,
   fontSize,
   opacity,
   onToggle,
@@ -56,7 +54,6 @@ export function OverlayView({
       <TranscriptDisplay
         segments={segments}
         provisionalText={provisionalText}
-        provisionalSpeaker={provisionalSpeaker}
         fontSize={fontSize}
         isListening={isRunning && segments.length === 0 && !provisionalText}
       />
