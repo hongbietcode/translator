@@ -34,7 +34,7 @@ fn build_menu(app: &tauri::App) -> tauri::Result<Menu<tauri::Wry>> {
     let app_submenu = Submenu::with_id_and_items(
         app,
         "app-menu",
-        "My Translator",
+        "Translator",
         true,
         &[&start_item, &sep_a1, &settings_item, &sep_a2, &quit_item],
     )?;
