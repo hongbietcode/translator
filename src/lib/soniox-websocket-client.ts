@@ -107,6 +107,7 @@ export class SonioxWebSocketClient {
 
       if (config.sourceLanguage && config.sourceLanguage !== "auto") {
         configMsg.language_hints = [config.sourceLanguage];
+        configMsg.language_hints_strict = true;
       }
 
       if (config.targetLanguage) {

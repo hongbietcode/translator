@@ -225,6 +225,21 @@ export function CaptionApp() {
     return () => { unlisten.then((fn) => fn()); };
   }, [reloadSettings]);
 
+  const prevLangRef = useRef({ source: settings.source_language, target: settings.target_language });
+  useEffect(() => {
+    const prev = prevLangRef.current;
+    const changed = prev.source !== settings.source_language || prev.target !== settings.target_language;
+    prevLangRef.current = { source: settings.source_language, target: settings.target_language };
+    if (changed && isRunningRef.current) {
+      soniox.connect({
+        apiKey: settings.soniox_api_key,
+        sourceLanguage: settings.source_language,
+        targetLanguage: settings.target_language,
+        customContext: settings.custom_context,
+      });
+    }
+  }, [settings.source_language, settings.target_language, settings.soniox_api_key, settings.custom_context, soniox]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
