@@ -10,7 +10,6 @@ export interface Settings {
   audio_source: string;
   overlay_opacity: number;
   font_size: number;
-  max_lines: number;
   show_original: boolean;
   custom_context: CustomContext | null;
   subtitle_mode: boolean;
@@ -32,7 +31,6 @@ export const DEFAULT_SETTINGS: Settings = {
   audio_source: "system",
   overlay_opacity: 0.85,
   font_size: 16,
-  max_lines: 5,
   show_original: true,
   custom_context: null,
   subtitle_mode: false,

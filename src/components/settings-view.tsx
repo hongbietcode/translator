@@ -32,7 +32,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [audioSource, setAudioSource] = useState("system");
   const [opacity, setOpacity] = useState(85);
   const [fontSize, setFontSize] = useState(16);
-  const [maxLines, setMaxLines] = useState(5);
   const [showOriginal, setShowOriginal] = useState(true);
   const [bgColor, setBgColor] = useState("#1a1a2e");
   const [textColor, setTextColor] = useState("#ffffff");
@@ -54,7 +53,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
     setAudioSource(settings.audio_source || "system");
     setOpacity(Math.round((settings.overlay_opacity || 0.85) * 100));
     setFontSize(settings.font_size || 16);
-    setMaxLines(settings.max_lines || 5);
     setShowOriginal(settings.show_original !== false);
     setBgColor(settings.background_color || "#1a1a2e");
     setTextColor(settings.text_color || "#ffffff");
@@ -77,7 +75,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
       audio_source: audioSource,
       overlay_opacity: opacity / 100,
       font_size: fontSize,
-      max_lines: maxLines,
       show_original: showOriginal,
       background_color: bgColor,
       text_color: textColor,
@@ -235,16 +232,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
               <div className="s-chip-row">
                 {[12, 14, 16, 18, 20].map((o) => (
                   <button key={o} className={`s-chip ${fontSize === o ? "s-chip--active" : ""}`} onClick={() => setFontSize(o)}>
-                    {o}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="s-display-item">
-              <span className="s-field-label">Max Lines</span>
-              <div className="s-chip-row">
-                {[3, 5, 8, 10].map((o) => (
-                  <button key={o} className={`s-chip ${maxLines === o ? "s-chip--active" : ""}`} onClick={() => setMaxLines(o)}>
                     {o}
                   </button>
                 ))}

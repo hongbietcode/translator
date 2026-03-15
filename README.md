@@ -31,7 +31,7 @@ Real-time speech translation app for macOS. Captures system audio or microphone 
 - Draggable toolbar with playback controls
 - Customizable font size, opacity, background color, text color
 - Show/hide original text alongside translation
-- Configurable max visible lines
+- Scrollable transcript history with auto-scroll to latest
 
 ### Subtitle Overlay (Netflix-style)
 - Transparent overlay at the bottom of the screen

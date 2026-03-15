@@ -14,7 +14,6 @@ interface OverlayViewProps {
   provisionalText: string;
   fontSize: number;
   opacity: number;
-  maxLines: number;
   showOriginal: boolean;
   backgroundColor: string;
   textColor: string;
@@ -45,7 +44,6 @@ export function OverlayView({
   provisionalText,
   fontSize,
   opacity,
-  maxLines,
   showOriginal,
   backgroundColor,
   textColor,
@@ -89,7 +87,6 @@ export function OverlayView({
           segments={segments}
           provisionalText={provisionalText}
           fontSize={fontSize}
-          maxLines={maxLines}
           showOriginal={showOriginal}
           isListening={isRunning && segments.length === 0 && !provisionalText}
           aiEnabled={aiEnabled}

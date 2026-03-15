@@ -35,7 +35,6 @@ interface TranscriptDisplayProps {
   segments: TranscriptSegment[];
   provisionalText: string;
   fontSize: number;
-  maxLines: number;
   showOriginal: boolean;
   isListening: boolean;
   aiEnabled?: boolean;
@@ -46,7 +45,6 @@ export function TranscriptDisplay({
   segments,
   provisionalText,
   fontSize,
-  maxLines,
   showOriginal,
   isListening,
   aiEnabled,
@@ -146,8 +144,7 @@ export function TranscriptDisplay({
       );
     }
 
-    const allBlocks = buildSpeakerBlocks(segments);
-    const blocks = maxLines > 0 ? allBlocks.slice(-maxLines) : allBlocks;
+    const blocks = buildSpeakerBlocks(segments);
 
     return (
       <div ref={scrollRef} className="transcript-scroll">

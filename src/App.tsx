@@ -261,7 +261,6 @@ export default function App() {
           provisionalText={soniox.provisionalText}
           fontSize={settings.font_size}
           opacity={settings.overlay_opacity}
-          maxLines={settings.max_lines}
           showOriginal={settings.show_original}
           backgroundColor={settings.background_color}
           textColor={settings.text_color}
