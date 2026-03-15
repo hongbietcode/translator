@@ -36,9 +36,9 @@ export function useAiService() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(
 					segments.map((s) => ({
-						text: s.text,
-						translation: s.translation,
-						speaker: s.speaker,
+						text: s.original,
+						translation: s.translation ?? undefined,
+						speaker: s.speaker ?? undefined,
 						timestamp: s.createdAt,
 					})),
 				),

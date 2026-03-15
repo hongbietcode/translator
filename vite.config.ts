@@ -25,5 +25,11 @@ export default defineConfig({
     minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
     sourcemap: !!process.env.TAURI_DEBUG,
     outDir: "dist",
+    rollupOptions: {
+      input: {
+        caption: path.resolve(__dirname, "caption.html"),
+        settings: path.resolve(__dirname, "settings.html"),
+      },
+    },
   },
 });

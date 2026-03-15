@@ -20,10 +20,7 @@ interface OverlayViewProps {
   aiConfigured: boolean;
   onToggle: () => void;
   onSourceChange: (source: string, device: string | null) => void;
-  onSettings: () => void;
-  onHistory: () => void;
   onClear: () => void;
-  onClose: () => void;
   onToggleAi: () => void;
   onAskAi: (segmentIndex: number) => void;
   onAiSend: (question: string) => void;
@@ -46,10 +43,7 @@ export function OverlayView({
   aiConfigured,
   onToggle,
   onSourceChange,
-  onSettings,
-  onHistory,
   onClear,
-  onClose,
   onToggleAi,
   onAskAi,
   onAiSend,
@@ -66,10 +60,7 @@ export function OverlayView({
         aiEnabled={aiEnabled}
         onToggle={onToggle}
         onSourceChange={onSourceChange}
-        onSettings={onSettings}
-        onHistory={onHistory}
         onClear={onClear}
-        onClose={onClose}
         onToggleAi={onToggleAi}
       />
 
@@ -95,9 +86,6 @@ export function OverlayView({
         )}
       </div>
 
-      <div className="overlay-resize">
-        <div className="overlay-resize-bar" />
-      </div>
     </div>
   );
 }

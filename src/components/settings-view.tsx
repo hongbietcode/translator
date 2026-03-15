@@ -21,11 +21,10 @@ const TARGET_LANGUAGES = LANGUAGES.filter((l) => l.value !== "auto");
 interface SettingsViewProps {
   settings: Settings;
   onSave: (settings: Partial<Settings>) => Promise<void>;
-  onBack: () => void;
   onToast: (message: string, type: "success" | "error" | "info") => void;
 }
 
-export function SettingsView({ settings, onSave, onBack, onToast }: SettingsViewProps) {
+export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [sourceLang, setSourceLang] = useState("auto");
@@ -86,7 +85,6 @@ export function SettingsView({ settings, onSave, onBack, onToast }: SettingsView
     try {
       await onSave(newSettings);
       onToast("Settings saved", "success");
-      onBack();
     } catch (err) {
       onToast(`Failed to save: ${err}`, "error");
     }
@@ -94,15 +92,8 @@ export function SettingsView({ settings, onSave, onBack, onToast }: SettingsView
 
   return (
     <div className="view-shell">
-      <div className="view-header" data-tauri-drag-region>
-        <button onClick={onBack} className="back-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </button>
+      <div className="view-header">
         <h2 className="view-header-title">Settings</h2>
-        <div className="view-header-spacer" />
       </div>
 
       <div className="s-body">
