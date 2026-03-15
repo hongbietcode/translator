@@ -28,6 +28,19 @@ export function useSettings() {
     [],
   );
 
+  const reloadSettings = useCallback(async () => {
+    try {
+      const s = await invoke<Settings>("get_settings");
+      const merged = { ...DEFAULT_SETTINGS, ...s };
+      setSettings(merged);
+      settingsRef.current = merged;
+      listenersRef.current.forEach((cb) => cb(merged));
+      return merged;
+    } catch {
+      return settingsRef.current;
+    }
+  }, []);
+
   const onChange = useCallback((cb: (s: Settings) => void) => {
     listenersRef.current.push(cb);
     return () => {
@@ -35,5 +48,5 @@ export function useSettings() {
     };
   }, []);
 
-  return { settings, updateSettings, isLoading, onChange };
+  return { settings, updateSettings, reloadSettings, isLoading, onChange };
 }

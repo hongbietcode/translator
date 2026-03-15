@@ -15,7 +15,7 @@ import { ToastContainer, showToast } from "@/components/toast";
 type View = "overlay" | "settings" | "history";
 
 export default function App() {
-  const { settings, updateSettings, isLoading } = useSettings();
+  const { settings, updateSettings, reloadSettings, isLoading } = useSettings();
   const { startCapture, stopCapture, setOnAudioData } = useAudioCapture();
   const history = useHistory();
   const { appendTranscript } = useTranscript();
@@ -215,21 +215,33 @@ export default function App() {
   }, [history]);
 
   useEffect(() => {
-    const unlisten = listen<string>("menu-event", (event) => {
+    const unlisten = listen<string>("menu-event", async (event) => {
       const id = event.payload;
+
+      const isTraySettingsEvent =
+        id.startsWith("lang-source-") ||
+        id.startsWith("lang-target-") ||
+        id.startsWith("ai-model-") ||
+        id === "ai-toggle" ||
+        id === "source-system" ||
+        id === "source-mic" ||
+        id === "source-both";
+
+      if (isTraySettingsEvent) {
+        await reloadSettings();
+        return;
+      }
+
       switch (id) {
         case "start": toggle(); break;
         case "settings": setCurrentView("settings"); break;
         case "view-history": setCurrentView("history"); break;
-        case "source-system": handleSourceChange("system", null); break;
-        case "source-mic": handleSourceChange("microphone", null); break;
-        case "source-both": handleSourceChange("both", null); break;
         case "export": break;
         case "clear-history": handleClearHistory(); break;
       }
     });
     return () => { unlisten.then((fn) => fn()); };
-  }, [toggle, handleSourceChange, handleClearHistory]);
+  }, [toggle, handleClearHistory, reloadSettings]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

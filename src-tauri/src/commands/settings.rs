@@ -1,7 +1,7 @@
 use crate::settings::{Settings, SettingsState};
-use tauri::State;
+use crate::tray::rebuild_tray_menu;
+use tauri::{AppHandle, State};
 
-/// Get current settings
 #[tauri::command]
 pub fn get_settings(state: State<'_, SettingsState>) -> Result<Settings, String> {
     let settings = state
@@ -11,9 +11,9 @@ pub fn get_settings(state: State<'_, SettingsState>) -> Result<Settings, String>
     Ok(settings.clone())
 }
 
-/// Save settings
 #[tauri::command]
 pub fn save_settings(
+    app: AppHandle,
     new_settings: Settings,
     state: State<'_, SettingsState>,
 ) -> Result<(), String> {
@@ -22,11 +22,11 @@ pub fn save_settings(
         .lock()
         .map_err(|e| format!("Lock error: {}", e))?;
 
-    // Save to disk
     new_settings.save()?;
+    *settings = new_settings.clone();
 
-    // Update in-memory state
-    *settings = new_settings;
+    drop(settings);
+    let _ = rebuild_tray_menu(&app, &new_settings);
 
     Ok(())
 }
