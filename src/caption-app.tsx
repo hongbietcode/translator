@@ -48,7 +48,7 @@ export function CaptionApp() {
 
   useEffect(() => {
     setOnAudioData((pcm: Uint8Array) => {
-      soniox.sendAudio(pcm.buffer.slice(pcm.byteOffset, pcm.byteOffset + pcm.byteLength));
+      soniox.sendAudio(pcm.slice().buffer as ArrayBuffer);
     });
   }, [setOnAudioData, soniox]);
 
@@ -66,6 +66,7 @@ export function CaptionApp() {
 
     setIsRunning(true);
     isRunningRef.current = true;
+    await invoke("set_translating", { active: true }).catch(() => {});
 
     history.startSession(currentSource, settings.source_language, settings.target_language);
 
@@ -97,6 +98,7 @@ export function CaptionApp() {
   const stop = useCallback(async () => {
     setIsRunning(false);
     isRunningRef.current = false;
+    await invoke("set_translating", { active: false }).catch(() => {});
     history.endSession();
 
     try {
@@ -143,7 +145,7 @@ export function CaptionApp() {
   useEffect(() => {
     const unlisten = getCurrentWindow().onCloseRequested(async () => {
       await stop();
-      await invoke("set_translating", { active: false }).catch(() => {});
+      await getCurrentWindow().destroy();
     });
     return () => { unlisten.then((fn) => fn()); };
   }, [stop]);

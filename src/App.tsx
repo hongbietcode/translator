@@ -52,7 +52,7 @@ export default function App() {
 
   useEffect(() => {
     setOnAudioData((pcm: Uint8Array) => {
-      soniox.sendAudio(pcm.buffer.slice(pcm.byteOffset, pcm.byteOffset + pcm.byteLength));
+      soniox.sendAudio(pcm.slice().buffer as ArrayBuffer);
     });
   }, [setOnAudioData, soniox]);
 
