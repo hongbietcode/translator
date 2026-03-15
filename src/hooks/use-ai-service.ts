@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import type { TranscriptSegment } from "./use-soniox";
-
-const AI_SERVICE_URL = "http://localhost:9999";
 
 export interface AiMessage {
 	role: "user" | "assistant";
@@ -12,36 +11,23 @@ export function useAiService() {
 	const [messages, setMessages] = useState<AiMessage[]>([]);
 	const [isStreaming, setIsStreaming] = useState(false);
 	const [isConfigured, setIsConfigured] = useState(false);
-	const abortRef = useRef<AbortController | null>(null);
+	const configRef = useRef<{ apiKey: string; model: string } | null>(null);
 
 	const configure = useCallback(async (apiKey: string, model: string) => {
-		try {
-			const res = await fetch(`${AI_SERVICE_URL}/config`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ apiKey, model }),
-			});
-			setIsConfigured(res.ok);
-			return res.ok;
-		} catch {
-			setIsConfigured(false);
-			return false;
-		}
+		configRef.current = { apiKey, model };
+		setIsConfigured(!!apiKey);
+		return !!apiKey;
 	}, []);
 
 	const syncTranscript = useCallback(async (segments: TranscriptSegment[]) => {
 		try {
-			await fetch(`${AI_SERVICE_URL}/transcript`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(
-					segments.map((s) => ({
-						text: s.original,
-						translation: s.translation ?? undefined,
-						speaker: s.speaker ?? undefined,
-						timestamp: s.createdAt,
-					})),
-				),
+			await invoke("ai_sync_transcript", {
+				segments: segments.map((s) => ({
+					text: s.original,
+					translation: s.translation ?? null,
+					speaker: s.speaker ?? null,
+					timestamp: s.createdAt,
+				})),
 			});
 		} catch {
 			// silent
@@ -49,89 +35,47 @@ export function useAiService() {
 	}, []);
 
 	const askAi = useCallback(async (question: string, context: { text: string; translation?: string; speaker?: number; timestamp: number }[]) => {
-		if (abortRef.current) abortRef.current.abort();
-		const controller = new AbortController();
-		abortRef.current = controller;
+		if (!configRef.current) return;
 
 		setMessages((prev) => [...prev, { role: "user", content: question }]);
 		setIsStreaming(true);
-
-		let assistantText = "";
 		setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
 		try {
-			const res = await fetch(`${AI_SERVICE_URL}/chat`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ question, context }),
-				signal: controller.signal,
+			const result = await invoke<string>("ai_chat", {
+				apiKey: configRef.current.apiKey,
+				model: configRef.current.model,
+				question,
+				context: context.map((c) => ({
+					text: c.text,
+					translation: c.translation ?? null,
+					speaker: c.speaker ?? null,
+					timestamp: c.timestamp,
+				})),
 			});
 
-			const reader = res.body?.getReader();
-			if (!reader) return;
-
-			const decoder = new TextDecoder();
-			let buffer = "";
-
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-
-				buffer += decoder.decode(value, { stream: true });
-				const lines = buffer.split("\n");
-				buffer = lines.pop() || "";
-
-				for (const line of lines) {
-					if (!line.startsWith("data: ")) continue;
-					try {
-						const data = JSON.parse(line.slice(6));
-						if (data.type === "text") {
-							assistantText += data.text;
-							setMessages((prev) => {
-								const next = [...prev];
-								next[next.length - 1] = { role: "assistant", content: assistantText };
-								return next;
-							});
-						}
-					} catch {
-						// skip malformed
-					}
-				}
-			}
+			setMessages((prev) => {
+				const next = [...prev];
+				next[next.length - 1] = { role: "assistant", content: result };
+				return next;
+			});
 		} catch (err) {
-			if ((err as Error).name !== "AbortError") {
-				assistantText += "\n\n[Error connecting to AI service]";
-				setMessages((prev) => {
-					const next = [...prev];
-					next[next.length - 1] = { role: "assistant", content: assistantText };
-					return next;
-				});
-			}
+			setMessages((prev) => {
+				const next = [...prev];
+				next[next.length - 1] = { role: "assistant", content: `[Error: ${err}]` };
+				return next;
+			});
 		}
 
 		setIsStreaming(false);
-		abortRef.current = null;
 	}, []);
 
 	const stopStreaming = useCallback(() => {
-		if (abortRef.current) {
-			abortRef.current.abort();
-			abortRef.current = null;
-			setIsStreaming(false);
-		}
+		setIsStreaming(false);
 	}, []);
 
 	const clearMessages = useCallback(() => {
 		setMessages([]);
-	}, []);
-
-	const checkHealth = useCallback(async () => {
-		try {
-			const res = await fetch(`${AI_SERVICE_URL}/health`);
-			return res.ok;
-		} catch {
-			return false;
-		}
 	}, []);
 
 	return {
@@ -143,6 +87,5 @@ export function useAiService() {
 		askAi,
 		stopStreaming,
 		clearMessages,
-		checkHealth,
 	};
 }

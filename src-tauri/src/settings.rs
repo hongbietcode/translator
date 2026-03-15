@@ -34,6 +34,27 @@ pub struct Settings {
     /// Anthropic API key for AI assistant
     #[serde(default)]
     pub anthropic_api_key: String,
+    /// Netflix-style subtitle mode
+    #[serde(default)]
+    pub subtitle_mode: bool,
+    /// Background color for caption window
+    #[serde(default = "default_bg_color")]
+    pub background_color: String,
+    /// Text color for caption window
+    #[serde(default = "default_text_color")]
+    pub text_color: String,
+    /// Font size for subtitle overlay
+    #[serde(default = "default_subtitle_font_size")]
+    pub subtitle_font_size: u32,
+    /// Background color for subtitle overlay
+    #[serde(default = "default_subtitle_bg_color")]
+    pub subtitle_bg_color: String,
+    /// Text color for subtitle overlay
+    #[serde(default = "default_subtitle_text_color")]
+    pub subtitle_text_color: String,
+    /// Whether to show original text in subtitle overlay
+    #[serde(default = "default_true")]
+    pub subtitle_show_original: bool,
     /// Whether AI assistant is enabled
     #[serde(default)]
     pub ai_enabled: bool,
@@ -41,6 +62,13 @@ pub struct Settings {
     #[serde(default = "default_ai_model")]
     pub ai_model: String,
 }
+
+fn default_bg_color() -> String { "#1a1a2e".to_string() }
+fn default_text_color() -> String { "#ffffff".to_string() }
+fn default_true() -> bool { true }
+fn default_subtitle_font_size() -> u32 { 28 }
+fn default_subtitle_bg_color() -> String { "rgba(0,0,0,0.75)".to_string() }
+fn default_subtitle_text_color() -> String { "#ffffff".to_string() }
 
 fn default_ai_model() -> String {
     "claude-haiku-4-5-20251001".to_string()
@@ -58,6 +86,13 @@ impl Default for Settings {
             max_lines: 5,
             show_original: true,
             custom_context: None,
+            subtitle_mode: false,
+            background_color: default_bg_color(),
+            text_color: default_text_color(),
+            subtitle_font_size: default_subtitle_font_size(),
+            subtitle_bg_color: default_subtitle_bg_color(),
+            subtitle_text_color: default_subtitle_text_color(),
+            subtitle_show_original: true,
             anthropic_api_key: String::new(),
             ai_enabled: false,
             ai_model: default_ai_model(),

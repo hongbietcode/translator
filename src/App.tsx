@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import { useSettings } from "@/hooks/use-settings";
 import { useAudioCapture } from "@/hooks/use-audio-capture";
@@ -145,7 +146,7 @@ export default function App() {
     await updateSettings({ ai_enabled: newVal });
     if (newVal && settings.anthropic_api_key) {
       const ok = await ai.configure(settings.anthropic_api_key, settings.ai_model);
-      if (!ok) showToast("Cannot connect to AI service. Make sure ai-service is running.", "error");
+      if (!ok) showToast("AI configuration failed. Check your API key.", "error");
     }
   }, [settings, updateSettings, ai]);
 
@@ -260,6 +261,10 @@ export default function App() {
           provisionalText={soniox.provisionalText}
           fontSize={settings.font_size}
           opacity={settings.overlay_opacity}
+          maxLines={settings.max_lines}
+          showOriginal={settings.show_original}
+          backgroundColor={settings.background_color}
+          textColor={settings.text_color}
           aiEnabled={settings.ai_enabled}
           aiMessages={ai.messages}
           aiStreaming={ai.isStreaming}
@@ -268,6 +273,10 @@ export default function App() {
           onSourceChange={handleSourceChange}
           onClear={handleClear}
           onToggleAi={handleToggleAi}
+          subtitleMode={settings.subtitle_mode}
+          onToggleSubtitle={() => updateSettings({ subtitle_mode: !settings.subtitle_mode })}
+          onMinimize={() => getCurrentWindow().minimize()}
+          onClose={() => getCurrentWindow().close()}
           onAskAi={handleAskAi}
           onAiSend={handleAiSend}
           onAiStop={ai.stopStreaming}

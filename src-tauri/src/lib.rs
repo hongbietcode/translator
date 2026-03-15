@@ -5,6 +5,7 @@ pub mod tray;
 
 use audio::microphone::MicCapture;
 use audio::system_audio::SystemAudioCapture;
+use commands::ai_chat::AiTranscriptStore;
 use commands::audio::AudioState;
 use settings::{Settings, SettingsState};
 use std::sync::Mutex;
@@ -12,6 +13,7 @@ use tauri::{
     tray::TrayIconBuilder,
     Manager, ActivationPolicy,
 };
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 #[tauri::command]
 fn set_translating(app: tauri::AppHandle, active: bool) {
@@ -23,13 +25,24 @@ fn is_translating() -> bool {
     tray::is_translating()
 }
 
+#[tauri::command]
+fn toggle_subtitle_window(app: tauri::AppHandle, show: bool) {
+    if show {
+        let _ = tray::open_subtitle_window(&app);
+    } else {
+        tray::close_subtitle_window(&app);
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let initial_settings = Settings::load();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(SettingsState(Mutex::new(initial_settings)))
+        .manage(AiTranscriptStore(Mutex::new(Vec::new())))
         .manage(AudioState {
             system_audio: Mutex::new(SystemAudioCapture::new()),
             microphone: Mutex::new(MicCapture::new()),
@@ -50,6 +63,13 @@ pub fn run() {
                 })
                 .build(app)?;
 
+            let shortcut: Shortcut = "CmdOrCtrl+L".parse().unwrap();
+            app.global_shortcut().on_shortcut(shortcut, |app, _shortcut, event| {
+                if event.state == ShortcutState::Pressed {
+                    let _ = tray::open_voice_input_window(app);
+                }
+            })?;
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -63,6 +83,10 @@ pub fn run() {
             commands::transcript::get_transcript_path,
             set_translating,
             is_translating,
+            toggle_subtitle_window,
+            commands::translate::translate_text,
+            commands::ai_chat::ai_chat,
+            commands::ai_chat::ai_sync_transcript,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

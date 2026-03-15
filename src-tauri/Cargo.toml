@@ -23,3 +23,7 @@ chrono = "0.4"
 # Audio capture
 screencapturekit = "1.5"
 cpal = "0.15"
+tauri-plugin-global-shortcut = "2"
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["macros"] }
+objc2 = "0.6.4"

@@ -13,6 +13,13 @@ export interface Settings {
   max_lines: number;
   show_original: boolean;
   custom_context: CustomContext | null;
+  subtitle_mode: boolean;
+  background_color: string;
+  text_color: string;
+  subtitle_font_size: number;
+  subtitle_bg_color: string;
+  subtitle_text_color: string;
+  subtitle_show_original: boolean;
   anthropic_api_key: string;
   ai_enabled: boolean;
   ai_model: string;
@@ -28,6 +35,13 @@ export const DEFAULT_SETTINGS: Settings = {
   max_lines: 5,
   show_original: true,
   custom_context: null,
+  subtitle_mode: false,
+  background_color: "#1a1a2e",
+  text_color: "#ffffff",
+  subtitle_font_size: 28,
+  subtitle_bg_color: "rgba(0,0,0,0.75)",
+  subtitle_text_color: "#ffffff",
+  subtitle_show_original: true,
   anthropic_api_key: "",
   ai_enabled: false,
   ai_model: "claude-haiku-4-5-20251001",

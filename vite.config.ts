@@ -29,6 +29,8 @@ export default defineConfig({
       input: {
         caption: path.resolve(__dirname, "caption.html"),
         settings: path.resolve(__dirname, "settings.html"),
+        "voice-input": path.resolve(__dirname, "voice-input.html"),
+        subtitle: path.resolve(__dirname, "subtitle.html"),
       },
     },
   },

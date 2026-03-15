@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import Markdown from "react-markdown";
 import type { AiMessage } from "@/hooks/use-ai-service";
 
 interface AiAssistantPanelProps {
@@ -53,7 +54,7 @@ export function AiAssistantPanel({
             <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
           </svg>
           <p>AI service not connected</p>
-          <span className="ai-panel-hint">Add your Anthropic API key in Settings and start the ai-service</span>
+          <span className="ai-panel-hint">Add your Anthropic API key in Settings to enable AI</span>
         </div>
       </div>
     );
@@ -77,11 +78,28 @@ export function AiAssistantPanel({
             <p>Click "Ask AI" on any transcript segment or type a question below</p>
           </div>
         )}
-        {messages.map((msg, i) => (
-          <div key={i} className={`ai-msg ai-msg--${msg.role}`}>
-            <div className="ai-msg-content">{msg.content || (isStreaming && i === messages.length - 1 ? "..." : "")}</div>
-          </div>
-        ))}
+        {messages.map((msg, i) => {
+          const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
+          const isLoading = isLastAssistant && isStreaming && !msg.content;
+
+          return (
+            <div key={i} className={`ai-msg ai-msg--${msg.role}`}>
+              <div className="ai-msg-content">
+                {isLoading ? (
+                  <div className="ai-loading">
+                    <span className="ai-loading-dot" />
+                    <span className="ai-loading-dot" />
+                    <span className="ai-loading-dot" />
+                  </div>
+                ) : msg.role === "assistant" ? (
+                  <Markdown>{msg.content}</Markdown>
+                ) : (
+                  msg.content
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="ai-panel-input">

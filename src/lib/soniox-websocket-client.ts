@@ -198,7 +198,6 @@ export class SonioxWebSocketClient {
 
   private handleResponse(data: SonioxResponse) {
     if (!data.tokens || data.tokens.length === 0) return;
-
     let originalText = "";
     let translationText = "";
     let provisionalText = "";
@@ -210,10 +209,11 @@ export class SonioxWebSocketClient {
         hasEnd = true;
         continue;
       }
-      if (token.speaker && token.translation_status === "original") {
+      if (token.speaker && (token.translation_status === "original" || !token.translation_status)) {
         speaker = token.speaker;
       }
-      if (token.translation_status === "original") {
+      const isOriginal = token.translation_status === "original" || !token.translation_status;
+      if (isOriginal) {
         if (token.is_final) originalText += token.text;
         else provisionalText += token.text;
       } else if (token.translation_status === "translation") {

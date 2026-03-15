@@ -116,6 +116,23 @@ pub fn build_tray_menu(handle: &AppHandle, s: &Settings) -> tauri::Result<Menu<W
         None::<&str>,
     )?;
 
+    let voice_input = MenuItem::with_id(
+        handle,
+        "voice-input",
+        "Voice Input",
+        true,
+        Some("CmdOrCtrl+L"),
+    )?;
+
+    let subtitle_toggle = CheckMenuItem::with_id(
+        handle,
+        "subtitle-toggle",
+        "Subtitle Overlay",
+        true,
+        s.subtitle_mode,
+        None::<&str>,
+    )?;
+
     let sep4 = PredefinedMenuItem::separator(handle)?;
     let settings = MenuItem::with_id(
         handle,
@@ -146,6 +163,8 @@ pub fn build_tray_menu(handle: &AppHandle, s: &Settings) -> tauri::Result<Menu<W
             &input_sub,
             &sep3,
             &ai_toggle,
+            &voice_input,
+            &subtitle_toggle,
             &sep4,
             &settings,
             &history,
@@ -174,7 +193,7 @@ pub fn open_caption_window(handle: &AppHandle) -> tauri::Result<()> {
         .title("Translator")
         .inner_size(900.0, 300.0)
         .min_inner_size(500.0, 300.0)
-        .decorations(true)
+        .decorations(false)
         .always_on_top(true)
         .resizable(true)
         .center()
@@ -204,6 +223,85 @@ pub fn open_settings_window(handle: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
+    if let Some(win) = handle.get_webview_window("voice-input") {
+        let _ = win.show();
+        let _ = win.set_focus();
+        return Ok(());
+    }
+
+    let _win = WebviewWindowBuilder::new(
+        handle,
+        "voice-input",
+        WebviewUrl::App("voice-input.html".into()),
+    )
+    .title("Voice Input")
+    .inner_size(420.0, 180.0)
+    .decorations(false)
+    .always_on_top(true)
+    .resizable(false)
+    .center()
+    .build()?;
+
+    Ok(())
+}
+
+pub fn open_subtitle_window(handle: &AppHandle) -> tauri::Result<()> {
+    if let Some(win) = handle.get_webview_window("subtitle") {
+        let _ = win.show();
+        return Ok(());
+    }
+
+    let monitor = handle.primary_monitor().ok().flatten().or_else(|| {
+        handle
+            .available_monitors()
+            .ok()
+            .and_then(|m| m.into_iter().next())
+    });
+
+    let (w, h) = monitor
+        .as_ref()
+        .map(|m| {
+            let s = m.size();
+            let sf = m.scale_factor();
+            (s.width as f64 / sf, s.height as f64 / sf)
+        })
+        .unwrap_or((1440.0, 900.0));
+
+    let _win =
+        WebviewWindowBuilder::new(handle, "subtitle", WebviewUrl::App("subtitle.html".into()))
+            .title("")
+            .inner_size(w, h * 0.25)
+            .position(0.0, h * 0.75)
+            .decorations(false)
+            .transparent(true)
+            .always_on_top(true)
+            .resizable(false)
+            .skip_taskbar(true)
+            .build()?;
+
+    #[cfg(target_os = "macos")]
+    unsafe {
+        use std::ffi::CStr;
+        let ns_win = _win.ns_window().unwrap() as *mut objc2::runtime::AnyObject;
+        let cls = objc2::runtime::AnyClass::get(CStr::from_bytes_with_nul(b"NSColor\0").unwrap())
+            .unwrap();
+        let clear_color: *mut objc2::runtime::AnyObject = objc2::msg_send![cls, clearColor];
+        let _: () = objc2::msg_send![ns_win, setBackgroundColor: clear_color];
+        let _: () = objc2::msg_send![ns_win, setOpaque: false];
+        let _: () = objc2::msg_send![ns_win, setHasShadow: false];
+        let _: () = objc2::msg_send![ns_win, setIgnoresMouseEvents: true];
+    }
+
+    Ok(())
+}
+
+pub fn close_subtitle_window(handle: &AppHandle) {
+    if let Some(win) = handle.get_webview_window("subtitle") {
+        let _ = win.destroy();
+    }
+}
+
 fn emit_to_caption(app: &AppHandle, event: &str, payload: &str) {
     if let Some(win) = app.get_webview_window("caption") {
         let _ = win.emit(event, payload);
@@ -215,11 +313,8 @@ pub fn handle_tray_event(app: &AppHandle, id: &str) {
         let was_translating = IS_TRANSLATING.load(Ordering::Relaxed);
         IS_TRANSLATING.store(!was_translating, Ordering::Relaxed);
 
-        if !was_translating {
-            let _ = open_caption_window(app);
-        } else {
-            emit_to_caption(app, "menu-event", "start");
-        }
+        let _ = open_caption_window(app);
+        emit_to_caption(app, "menu-event", "start");
 
         let s = app.state::<SettingsState>().0.lock().unwrap().clone();
         let _ = rebuild_tray_menu(app, &s);
@@ -228,6 +323,11 @@ pub fn handle_tray_event(app: &AppHandle, id: &str) {
 
     if id == "settings" {
         let _ = open_settings_window(app);
+        return;
+    }
+
+    if id == "voice-input" {
+        let _ = open_voice_input_window(app);
         return;
     }
 
@@ -264,6 +364,14 @@ pub fn handle_tray_event(app: &AppHandle, id: &str) {
         changed = true;
     } else if id == "ai-toggle" {
         settings.ai_enabled = !settings.ai_enabled;
+        changed = true;
+    } else if id == "subtitle-toggle" {
+        settings.subtitle_mode = !settings.subtitle_mode;
+        if settings.subtitle_mode {
+            let _ = open_subtitle_window(app);
+        } else {
+            close_subtitle_window(app);
+        }
         changed = true;
     }
 

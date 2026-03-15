@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { emitTo } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useSettings } from "@/hooks/use-settings";
 import { useAudioCapture } from "@/hooks/use-audio-capture";
@@ -33,6 +34,10 @@ export function CaptionApp() {
   useEffect(() => {
     if (!isLoading && settings.ai_enabled && settings.anthropic_api_key) {
       ai.configure(settings.anthropic_api_key, settings.ai_model);
+      import("@tauri-apps/api/dpi").then(({ LogicalSize }) => {
+        const win = getCurrentWindow();
+        win.setSize(new LogicalSize(1200, 600)).then(() => win.center());
+      });
     }
   }, [isLoading, settings.ai_enabled, settings.anthropic_api_key, settings.ai_model]);
 
@@ -57,6 +62,34 @@ export function CaptionApp() {
       ai.syncTranscript(soniox.segments);
     }
   }, [settings.ai_enabled, soniox.segments]);
+
+  useEffect(() => {
+    if (!settings.subtitle_mode) return;
+    const translated = soniox.segments.filter((s) => s.status === "translated" && s.translation);
+    const lastTwo = translated.slice(-2);
+    emitTo("subtitle", "subtitle-update", {
+      lines: lastTwo.map((s) => s.translation),
+      original: settings.subtitle_show_original ? lastTwo.map((s) => s.original).join(" ") : "",
+      fontSize: settings.subtitle_font_size,
+      bgColor: settings.subtitle_bg_color,
+      textColor: settings.subtitle_text_color,
+    });
+  }, [soniox.segments, settings.subtitle_mode, settings.subtitle_show_original, settings.subtitle_font_size, settings.subtitle_bg_color, settings.subtitle_text_color]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      invoke("toggle_subtitle_window", { show: settings.subtitle_mode });
+      const win = getCurrentWindow();
+      if (settings.subtitle_mode) {
+        win.minimize();
+      } else {
+        win.unminimize().then(() => {
+          win.show();
+          win.setFocus();
+        });
+      }
+    }
+  }, [isLoading, settings.subtitle_mode]);
 
   const start = useCallback(async () => {
     if (!settings.soniox_api_key) {
@@ -157,9 +190,19 @@ export function CaptionApp() {
   const handleToggleAi = useCallback(async () => {
     const newVal = !settings.ai_enabled;
     await updateSettings({ ai_enabled: newVal });
-    if (newVal && settings.anthropic_api_key) {
-      const ok = await ai.configure(settings.anthropic_api_key, settings.ai_model);
-      if (!ok) showToast("Cannot connect to AI service. Make sure ai-service is running.", "error");
+    const win = getCurrentWindow();
+    if (newVal) {
+      if (settings.anthropic_api_key) {
+        const ok = await ai.configure(settings.anthropic_api_key, settings.ai_model);
+        if (!ok) showToast("AI configuration failed. Check your API key.", "error");
+      }
+      const { LogicalSize } = await import("@tauri-apps/api/dpi");
+      await win.setSize(new LogicalSize(1200, 600));
+      await win.center();
+    } else {
+      const { LogicalSize } = await import("@tauri-apps/api/dpi");
+      await win.setSize(new LogicalSize(900, 300));
+      await win.center();
     }
   }, [settings, updateSettings, ai]);
 
@@ -263,6 +306,10 @@ export function CaptionApp() {
         provisionalText={soniox.provisionalText}
         fontSize={settings.font_size}
         opacity={settings.overlay_opacity}
+        maxLines={settings.max_lines}
+        showOriginal={settings.show_original}
+        backgroundColor={settings.background_color}
+        textColor={settings.text_color}
         aiEnabled={settings.ai_enabled}
         aiMessages={ai.messages}
         aiStreaming={ai.isStreaming}
@@ -271,6 +318,10 @@ export function CaptionApp() {
         onSourceChange={handleSourceChange}
         onClear={handleClear}
         onToggleAi={handleToggleAi}
+        subtitleMode={settings.subtitle_mode}
+        onToggleSubtitle={() => updateSettings({ subtitle_mode: !settings.subtitle_mode })}
+        onMinimize={() => getCurrentWindow().minimize()}
+        onClose={() => getCurrentWindow().close()}
         onAskAi={handleAskAi}
         onAiSend={handleAiSend}
         onAiStop={ai.stopStreaming}

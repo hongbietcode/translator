@@ -34,6 +34,12 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [fontSize, setFontSize] = useState(16);
   const [maxLines, setMaxLines] = useState(5);
   const [showOriginal, setShowOriginal] = useState(true);
+  const [bgColor, setBgColor] = useState("#1a1a2e");
+  const [textColor, setTextColor] = useState("#ffffff");
+  const [subtitleFontSize, setSubtitleFontSize] = useState(28);
+  const [subtitleBgColor, setSubtitleBgColor] = useState("rgba(0,0,0,0.75)");
+  const [subtitleTextColor, setSubtitleTextColor] = useState("#ffffff");
+  const [subtitleShowOriginal, setSubtitleShowOriginal] = useState(true);
   const [contextDomain, setContextDomain] = useState("");
   const [contextTerms, setContextTerms] = useState("");
   const [anthropicKey, setAnthropicKey] = useState("");
@@ -50,6 +56,12 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
     setFontSize(settings.font_size || 16);
     setMaxLines(settings.max_lines || 5);
     setShowOriginal(settings.show_original !== false);
+    setBgColor(settings.background_color || "#1a1a2e");
+    setTextColor(settings.text_color || "#ffffff");
+    setSubtitleFontSize(settings.subtitle_font_size || 28);
+    setSubtitleBgColor(settings.subtitle_bg_color || "rgba(0,0,0,0.75)");
+    setSubtitleTextColor(settings.subtitle_text_color || "#ffffff");
+    setSubtitleShowOriginal(settings.subtitle_show_original !== false);
     setContextDomain(settings.custom_context?.domain || "");
     setContextTerms((settings.custom_context?.terms || []).join(", "));
     setAnthropicKey(settings.anthropic_api_key || "");
@@ -67,6 +79,12 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
       font_size: fontSize,
       max_lines: maxLines,
       show_original: showOriginal,
+      background_color: bgColor,
+      text_color: textColor,
+      subtitle_font_size: subtitleFontSize,
+      subtitle_bg_color: subtitleBgColor,
+      subtitle_text_color: subtitleTextColor,
+      subtitle_show_original: subtitleShowOriginal,
       custom_context: null,
       anthropic_api_key: anthropicKey.trim(),
       ai_enabled: aiEnabled,
@@ -199,7 +217,7 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
         <div className="s-card">
           <div className="s-card-header">
             <MonitorIcon />
-            <span>Display</span>
+            <span>Caption Display</span>
           </div>
           <div className="s-display-grid">
             <div className="s-display-item">
@@ -236,6 +254,62 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
           <label className="s-toggle-row">
             <span>Show original text</span>
             <div className={`s-switch ${showOriginal ? "s-switch--on" : ""}`} onClick={() => setShowOriginal(!showOriginal)}>
+              <div className="s-switch-thumb" />
+            </div>
+          </label>
+          <div className="s-color-row">
+            <div className="s-color-field">
+              <span className="s-field-label">Background</span>
+              <div className="s-color-input">
+                <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} />
+                <input type="text" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="input-field s-color-hex" />
+              </div>
+            </div>
+            <div className="s-color-field">
+              <span className="s-field-label">Text Color</span>
+              <div className="s-color-input">
+                <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} />
+                <input type="text" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="input-field s-color-hex" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="s-card">
+          <div className="s-card-header">
+            <SubtitleIcon />
+            <span>Subtitle Display</span>
+          </div>
+          <div className="s-display-grid">
+            <div className="s-display-item">
+              <span className="s-field-label">Font Size</span>
+              <div className="s-chip-row">
+                {[20, 24, 28, 32, 36].map((o) => (
+                  <button key={o} className={`s-chip ${subtitleFontSize === o ? "s-chip--active" : ""}`} onClick={() => setSubtitleFontSize(o)}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="s-color-row">
+            <div className="s-color-field">
+              <span className="s-field-label">Background</span>
+              <div className="s-color-input">
+                <input type="text" value={subtitleBgColor} onChange={(e) => setSubtitleBgColor(e.target.value)} className="input-field" />
+              </div>
+            </div>
+            <div className="s-color-field">
+              <span className="s-field-label">Text Color</span>
+              <div className="s-color-input">
+                <input type="color" value={subtitleTextColor} onChange={(e) => setSubtitleTextColor(e.target.value)} />
+                <input type="text" value={subtitleTextColor} onChange={(e) => setSubtitleTextColor(e.target.value)} className="input-field s-color-hex" />
+              </div>
+            </div>
+          </div>
+          <label className="s-toggle-row">
+            <span>Show original text</span>
+            <div className={`s-switch ${subtitleShowOriginal ? "s-switch--on" : ""}`} onClick={() => setSubtitleShowOriginal(!subtitleShowOriginal)}>
               <div className="s-switch-thumb" />
             </div>
           </label>
@@ -403,6 +477,16 @@ function SparkleIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+    </svg>
+  );
+}
+
+function SubtitleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <line x1="6" y1="14" x2="18" y2="14" />
+      <line x1="8" y1="18" x2="16" y2="18" />
     </svg>
   );
 }
