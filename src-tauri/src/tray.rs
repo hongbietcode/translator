@@ -93,7 +93,7 @@ pub fn open_settings_window(handle: &AppHandle) -> tauri::Result<()> {
         .inner_size(480.0, 640.0)
         .min_inner_size(400.0, 400.0)
         .decorations(true)
-        .always_on_top(false)
+        .always_on_top(true)
         .resizable(true)
         .center()
         .build()?;
