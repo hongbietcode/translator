@@ -8,49 +8,151 @@ static IS_TRANSLATING: AtomicBool = AtomicBool::new(false);
 
 pub fn build_tray_menu(handle: &AppHandle, s: &Settings) -> tauri::Result<Menu<Wry>> {
     let translating = IS_TRANSLATING.load(Ordering::Relaxed);
-    let start_label = if translating { "■ Stop Live Translate" } else { "▶ Start Live Translate" };
+    let start_label = if translating {
+        "■ Stop Live Translate"
+    } else {
+        "▶ Start Live Translate"
+    };
     let start = MenuItem::with_id(handle, "start", start_label, true, Some("CmdOrCtrl+Return"))?;
     let sep1 = PredefinedMenuItem::separator(handle)?;
 
-    let src_langs = [("auto", "Auto-detect"), ("en", "English"), ("ja", "Japanese"), ("ko", "Korean"), ("zh", "Chinese")];
-    let src_items: Vec<CheckMenuItem<Wry>> = src_langs.iter().map(|(code, label)| {
-        CheckMenuItem::with_id(handle, format!("lang-source-{}", code), *label, true, s.source_language == *code, None::<&str>).unwrap()
-    }).collect();
-    let src_refs: Vec<&dyn tauri::menu::IsMenuItem<Wry>> = src_items.iter().map(|i| i as &dyn tauri::menu::IsMenuItem<Wry>).collect();
-    let source_sub = Submenu::with_id_and_items(handle, "tray-source", "Source Language", true, &src_refs)?;
+    let src_langs = [
+        ("auto", "Auto-detect"),
+        ("en", "English"),
+        ("ja", "Japanese"),
+        ("ko", "Korean"),
+        ("zh", "Chinese"),
+    ];
+    let src_items: Vec<CheckMenuItem<Wry>> = src_langs
+        .iter()
+        .map(|(code, label)| {
+            CheckMenuItem::with_id(
+                handle,
+                format!("lang-source-{}", code),
+                *label,
+                true,
+                s.source_language == *code,
+                None::<&str>,
+            )
+            .unwrap()
+        })
+        .collect();
+    let src_refs: Vec<&dyn tauri::menu::IsMenuItem<Wry>> = src_items
+        .iter()
+        .map(|i| i as &dyn tauri::menu::IsMenuItem<Wry>)
+        .collect();
+    let source_sub =
+        Submenu::with_id_and_items(handle, "tray-source", "Source Language", true, &src_refs)?;
 
-    let tgt_langs = [("vi", "Vietnamese"), ("en", "English"), ("ja", "Japanese"), ("ko", "Korean"), ("zh", "Chinese")];
-    let tgt_items: Vec<CheckMenuItem<Wry>> = tgt_langs.iter().map(|(code, label)| {
-        CheckMenuItem::with_id(handle, format!("lang-target-{}", code), *label, true, s.target_language == *code, None::<&str>).unwrap()
-    }).collect();
-    let tgt_refs: Vec<&dyn tauri::menu::IsMenuItem<Wry>> = tgt_items.iter().map(|i| i as &dyn tauri::menu::IsMenuItem<Wry>).collect();
-    let target_sub = Submenu::with_id_and_items(handle, "tray-target", "Target Language", true, &tgt_refs)?;
+    let tgt_langs = [
+        ("vi", "Vietnamese"),
+        ("en", "English"),
+        ("ja", "Japanese"),
+        ("ko", "Korean"),
+        ("zh", "Chinese"),
+    ];
+    let tgt_items: Vec<CheckMenuItem<Wry>> = tgt_langs
+        .iter()
+        .map(|(code, label)| {
+            CheckMenuItem::with_id(
+                handle,
+                format!("lang-target-{}", code),
+                *label,
+                true,
+                s.target_language == *code,
+                None::<&str>,
+            )
+            .unwrap()
+        })
+        .collect();
+    let tgt_refs: Vec<&dyn tauri::menu::IsMenuItem<Wry>> = tgt_items
+        .iter()
+        .map(|i| i as &dyn tauri::menu::IsMenuItem<Wry>)
+        .collect();
+    let target_sub =
+        Submenu::with_id_and_items(handle, "tray-target", "Target Language", true, &tgt_refs)?;
 
     let sep2 = PredefinedMenuItem::separator(handle)?;
 
-    let inp_sys = CheckMenuItem::with_id(handle, "source-system", "System Audio", true, s.audio_source == "system", None::<&str>)?;
-    let inp_mic = CheckMenuItem::with_id(handle, "source-mic", "Microphone", true, s.audio_source == "microphone", None::<&str>)?;
-    let inp_both = CheckMenuItem::with_id(handle, "source-both", "Both", true, s.audio_source == "both", None::<&str>)?;
-    let input_sub = Submenu::with_id_and_items(handle, "tray-input", "Audio Input", true, &[&inp_sys, &inp_mic, &inp_both])?;
+    let inp_sys = CheckMenuItem::with_id(
+        handle,
+        "source-system",
+        "System Audio",
+        true,
+        s.audio_source == "system",
+        None::<&str>,
+    )?;
+    let inp_mic = CheckMenuItem::with_id(
+        handle,
+        "source-mic",
+        "Microphone",
+        true,
+        s.audio_source == "microphone",
+        None::<&str>,
+    )?;
+    let inp_both = CheckMenuItem::with_id(
+        handle,
+        "source-both",
+        "Both",
+        true,
+        s.audio_source == "both",
+        None::<&str>,
+    )?;
+    let input_sub = Submenu::with_id_and_items(
+        handle,
+        "tray-input",
+        "Audio Input",
+        true,
+        &[&inp_sys, &inp_mic, &inp_both],
+    )?;
 
     let sep3 = PredefinedMenuItem::separator(handle)?;
-    let ai_toggle = CheckMenuItem::with_id(handle, "ai-toggle", "AI Assistant", true, s.ai_enabled, None::<&str>)?;
+    let ai_toggle = CheckMenuItem::with_id(
+        handle,
+        "ai-toggle",
+        "AI Assistant",
+        true,
+        s.ai_enabled,
+        None::<&str>,
+    )?;
 
     let sep4 = PredefinedMenuItem::separator(handle)?;
-    let settings = MenuItem::with_id(handle, "settings", "Settings…", true, Some("CmdOrCtrl+Comma"))?;
-    let history = MenuItem::with_id(handle, "view-history", "View History", true, Some("CmdOrCtrl+H"))?;
+    let settings = MenuItem::with_id(
+        handle,
+        "settings",
+        "Settings…",
+        true,
+        Some("CmdOrCtrl+Comma"),
+    )?;
+    let history = MenuItem::with_id(
+        handle,
+        "view-history",
+        "View History",
+        true,
+        Some("CmdOrCtrl+H"),
+    )?;
 
     let sep5 = PredefinedMenuItem::separator(handle)?;
     let quit = PredefinedMenuItem::quit(handle, Some("Quit Translator"))?;
 
-    Menu::with_items(handle, &[
-        &start, &sep1,
-        &source_sub, &target_sub, &sep2,
-        &input_sub, &sep3,
-        &ai_toggle, &sep4,
-        &settings, &history, &sep5,
-        &quit,
-    ])
+    Menu::with_items(
+        handle,
+        &[
+            &start,
+            &sep1,
+            &source_sub,
+            &target_sub,
+            &sep2,
+            &input_sub,
+            &sep3,
+            &ai_toggle,
+            &sep4,
+            &settings,
+            &history,
+            &sep5,
+            &quit,
+        ],
+    )
 }
 
 pub fn rebuild_tray_menu(handle: &AppHandle, s: &Settings) -> tauri::Result<()> {
@@ -70,7 +172,7 @@ pub fn open_caption_window(handle: &AppHandle) -> tauri::Result<()> {
 
     let _win = WebviewWindowBuilder::new(handle, "caption", WebviewUrl::App("caption.html".into()))
         .title("Translator")
-        .inner_size(900.0, 500.0)
+        .inner_size(900.0, 300.0)
         .min_inner_size(500.0, 300.0)
         .decorations(true)
         .always_on_top(true)
@@ -88,15 +190,16 @@ pub fn open_settings_window(handle: &AppHandle) -> tauri::Result<()> {
         return Ok(());
     }
 
-    let _win = WebviewWindowBuilder::new(handle, "settings", WebviewUrl::App("settings.html".into()))
-        .title("Translator Settings")
-        .inner_size(480.0, 640.0)
-        .min_inner_size(400.0, 400.0)
-        .decorations(true)
-        .always_on_top(true)
-        .resizable(true)
-        .center()
-        .build()?;
+    let _win =
+        WebviewWindowBuilder::new(handle, "settings", WebviewUrl::App("settings.html".into()))
+            .title("Translator Settings")
+            .inner_size(480.0, 640.0)
+            .min_inner_size(400.0, 400.0)
+            .decorations(true)
+            .always_on_top(true)
+            .resizable(true)
+            .center()
+            .build()?;
 
     Ok(())
 }
