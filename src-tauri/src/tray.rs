@@ -225,7 +225,7 @@ pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
         return Ok(());
     }
 
-    let _win = WebviewWindowBuilder::new(
+    let builder = WebviewWindowBuilder::new(
         handle,
         "voice-input",
         WebviewUrl::App("voice-input.html".into()),
@@ -235,9 +235,30 @@ pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
     .decorations(false)
     .transparent(true)
     .always_on_top(true)
-    .resizable(false)
-    .center()
-    .build()?;
+    .resizable(false);
+
+    let monitor = handle.primary_monitor().ok().flatten().or_else(|| {
+        handle
+            .available_monitors()
+            .ok()
+            .and_then(|m| m.into_iter().next())
+    });
+
+    let (screen_w, screen_h) = monitor
+        .as_ref()
+        .map(|m| {
+            let s = m.size();
+            let sf = m.scale_factor();
+            (s.width as f64 / sf, s.height as f64 / sf)
+        })
+        .unwrap_or((1440.0, 900.0));
+
+    let win_w = 480.0;
+    let win_h = 48.0;
+    let x = (screen_w - win_w) / 2.0;
+    let y = screen_h - win_h - 80.0;
+
+    let _win = builder.position(x, y).build()?;
 
     #[cfg(target_os = "macos")]
     {
