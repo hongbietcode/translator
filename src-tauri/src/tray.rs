@@ -107,14 +107,6 @@ pub fn build_tray_menu(handle: &AppHandle, s: &Settings) -> tauri::Result<Menu<W
     )?;
 
     let sep3 = PredefinedMenuItem::separator(handle)?;
-    let ai_toggle = CheckMenuItem::with_id(
-        handle,
-        "ai-toggle",
-        "AI Assistant",
-        true,
-        s.ai_enabled,
-        None::<&str>,
-    )?;
 
     let shortcut_label = if s.voice_input_shortcut.is_empty() {
         "CmdOrCtrl+L".to_string()
@@ -167,7 +159,6 @@ pub fn build_tray_menu(handle: &AppHandle, s: &Settings) -> tauri::Result<Menu<W
             &sep2,
             &input_sub,
             &sep3,
-            &ai_toggle,
             &voice_input,
             &subtitle_toggle,
             &sep4,
@@ -366,9 +357,6 @@ pub fn handle_tray_event(app: &AppHandle, id: &str) {
         changed = true;
     } else if id == "source-both" {
         settings.audio_source = "both".to_string();
-        changed = true;
-    } else if id == "ai-toggle" {
-        settings.ai_enabled = !settings.ai_enabled;
         changed = true;
     } else if id == "subtitle-toggle" {
         settings.subtitle_mode = !settings.subtitle_mode;

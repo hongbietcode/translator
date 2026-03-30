@@ -6,12 +6,10 @@ interface TitlebarProps {
   isRunning: boolean;
   currentSource: string;
   currentDevice: string | null;
-  aiEnabled: boolean;
   subtitleMode: boolean;
   onToggle: () => void;
   onSourceChange: (source: string, device: string | null) => void;
   onClear: () => void;
-  onToggleAi: () => void;
   onToggleSubtitle: () => void;
   onMinimize: () => void;
   onClose: () => void;
@@ -29,11 +27,9 @@ export function Titlebar({
   isRunning,
   currentSource,
   currentDevice,
-  aiEnabled,
   onToggle,
   onSourceChange,
   onClear,
-  onToggleAi,
   onToggleSubtitle,
   subtitleMode,
   onMinimize,
@@ -71,18 +67,6 @@ export function Titlebar({
             </svg>
           )}
           <span>{isRunning ? "Stop" : "Start"}</span>
-        </button>
-
-        <div className="pill-divider" />
-
-        <button
-          onClick={onToggleAi}
-          className={`pill-segment pill-icon ${aiEnabled ? "pill-icon--active" : ""}`}
-          title="AI Assistant"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
-          </svg>
         </button>
 
         <div className="pill-divider" />

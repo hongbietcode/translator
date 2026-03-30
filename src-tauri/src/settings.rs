@@ -31,9 +31,6 @@ pub struct Settings {
     pub show_original: bool,
     /// Optional custom context for better transcription
     pub custom_context: Option<CustomContext>,
-    /// Anthropic API key for AI assistant
-    #[serde(default)]
-    pub anthropic_api_key: String,
     /// Netflix-style subtitle mode
     #[serde(default)]
     pub subtitle_mode: bool,
@@ -55,12 +52,6 @@ pub struct Settings {
     /// Whether to show original text in subtitle overlay
     #[serde(default = "default_true")]
     pub subtitle_show_original: bool,
-    /// Whether AI assistant is enabled
-    #[serde(default)]
-    pub ai_enabled: bool,
-    /// AI model to use
-    #[serde(default = "default_ai_model")]
-    pub ai_model: String,
     /// Global shortcut for voice input
     #[serde(default = "default_voice_input_shortcut")]
     pub voice_input_shortcut: String,
@@ -96,10 +87,6 @@ fn default_true() -> bool { true }
 fn default_subtitle_font_size() -> u32 { 28 }
 fn default_subtitle_bg_color() -> String { "rgba(0,0,0,0.75)".to_string() }
 fn default_subtitle_text_color() -> String { "#ffffff".to_string() }
-
-fn default_ai_model() -> String {
-    "claude-haiku-4-5-20251001".to_string()
-}
 
 fn default_voice_input_shortcut() -> String {
     "CmdOrCtrl+L".to_string()
@@ -140,9 +127,6 @@ impl Default for Settings {
             subtitle_bg_color: default_subtitle_bg_color(),
             subtitle_text_color: default_subtitle_text_color(),
             subtitle_show_original: true,
-            anthropic_api_key: String::new(),
-            ai_enabled: false,
-            ai_model: default_ai_model(),
             voice_input_shortcut: default_voice_input_shortcut(),
             voice_stop_word: String::new(),
             voice_enter_mode: false,

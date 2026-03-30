@@ -1,4 +1,3 @@
-pub mod ai_chat;
 pub mod audio;
 pub mod global_shortcut;
 pub mod llm_correction;

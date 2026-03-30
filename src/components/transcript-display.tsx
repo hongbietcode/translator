@@ -37,8 +37,6 @@ interface TranscriptDisplayProps {
   fontSize: number;
   showOriginal: boolean;
   isListening: boolean;
-  aiEnabled?: boolean;
-  onAskAi?: (segmentIndex: number) => void;
 }
 
 export function TranscriptDisplay({
@@ -47,8 +45,6 @@ export function TranscriptDisplay({
   fontSize,
   showOriginal,
   isListening,
-  aiEnabled,
-  onAskAi,
 }: TranscriptDisplayProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [settledIds, setSettledIds] = useState<Set<number>>(
@@ -180,13 +176,6 @@ export function TranscriptDisplay({
                               </span>
                             ),
                           )
-                        )}
-                        {aiEnabled && onAskAi && (
-                          <button className="ask-ai-btn" onClick={() => onAskAi(globalIdx)} title="Ask AI">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
-                            </svg>
-                          </button>
                         )}
                         {" "}
                       </span>

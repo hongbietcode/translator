@@ -42,10 +42,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [subtitleShowOriginal, setSubtitleShowOriginal] = useState(true);
   const [contextDomain, setContextDomain] = useState("");
   const [contextTerms, setContextTerms] = useState("");
-  const [anthropicKey, setAnthropicKey] = useState("");
-  const [showAnthropicKey, setShowAnthropicKey] = useState(false);
-  const [aiEnabled, setAiEnabled] = useState(false);
-  const [aiModel, setAiModel] = useState("claude-haiku-4-5-20251001");
   const [voiceShortcut, setVoiceShortcut] = useState("CmdOrCtrl+L");
   const [voiceStopWord, setVoiceStopWord] = useState("");
   const [voiceEnterMode, setVoiceEnterMode] = useState(false);
@@ -74,9 +70,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
     setSubtitleShowOriginal(settings.subtitle_show_original !== false);
     setContextDomain(settings.custom_context?.domain || "");
     setContextTerms((settings.custom_context?.terms || []).join(", "));
-    setAnthropicKey(settings.anthropic_api_key || "");
-    setAiEnabled(settings.ai_enabled || false);
-    setAiModel(settings.ai_model || "claude-haiku-4-5-20251001");
     setVoiceShortcut(settings.voice_input_shortcut || "CmdOrCtrl+L");
     setVoiceStopWord(settings.voice_stop_word || "");
     setVoiceEnterMode(settings.voice_enter_mode || false);
@@ -104,9 +97,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
       subtitle_text_color: subtitleTextColor,
       subtitle_show_original: subtitleShowOriginal,
       custom_context: null,
-      anthropic_api_key: anthropicKey.trim(),
-      ai_enabled: aiEnabled,
-      ai_model: aiModel,
       voice_input_shortcut: voiceShortcut,
       voice_stop_word: voiceStopWord,
       voice_enter_mode: voiceEnterMode,
@@ -393,68 +383,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
             />
           </div>
           <p className="s-hint">Comma-separated terms to improve accuracy</p>
-        </div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <SparkleIcon />
-            <span>AI Assistant</span>
-          </div>
-          <label className="s-toggle-row">
-            <span>Enable AI Assistant</span>
-            <div className={`s-switch ${aiEnabled ? "s-switch--on" : ""}`} onClick={() => setAiEnabled(!aiEnabled)}>
-              <div className="s-switch-thumb" />
-            </div>
-          </label>
-          <div className="s-field" style={{ marginTop: 8 }}>
-            <span className="s-field-label">Anthropic API Key</span>
-            <div className="s-key-row">
-              <input
-                type={showAnthropicKey ? "text" : "password"}
-                value={anthropicKey}
-                onChange={(e) => setAnthropicKey(e.target.value)}
-                placeholder="Enter your Anthropic API key..."
-                className="input-field"
-                autoComplete="off"
-              />
-              <button onClick={() => setShowAnthropicKey(!showAnthropicKey)} className="s-icon-btn" title="Show/Hide">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  {showAnthropicKey ? (
-                    <>
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </>
-                  ) : (
-                    <>
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </>
-                  )}
-                </svg>
-              </button>
-            </div>
-            <p className="s-hint">
-              Get your key at{" "}
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  openUrl("https://console.anthropic.com/");
-                }}
-              >
-                console.anthropic.com
-              </a>
-            </p>
-          </div>
-          <div className="s-field" style={{ marginTop: 8 }}>
-            <span className="s-field-label">Model</span>
-            <select value={aiModel} onChange={(e) => setAiModel(e.target.value)} className="select-field">
-              <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (Fast)</option>
-              <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (Balanced)</option>
-              <option value="claude-opus-4-6">Claude Opus 4.6 (Best)</option>
-            </select>
-          </div>
         </div>
 
         <div className="s-card">

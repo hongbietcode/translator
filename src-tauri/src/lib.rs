@@ -5,7 +5,6 @@ pub mod tray;
 
 use audio::microphone::MicCapture;
 use audio::system_audio::SystemAudioCapture;
-use commands::ai_chat::AiTranscriptStore;
 use commands::audio::AudioState;
 use settings::{Settings, SettingsState};
 use std::sync::Mutex;
@@ -42,7 +41,6 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(SettingsState(Mutex::new(initial_settings)))
-        .manage(AiTranscriptStore(Mutex::new(Vec::new())))
         .manage(AudioState {
             system_audio: Mutex::new(SystemAudioCapture::new()),
             microphone: Mutex::new(MicCapture::new()),
@@ -88,8 +86,6 @@ pub fn run() {
             is_translating,
             toggle_subtitle_window,
             commands::translate::translate_text,
-            commands::ai_chat::ai_chat,
-            commands::ai_chat::ai_sync_transcript,
             commands::text_inserter::insert_text_at_cursor,
             commands::text_inserter::check_accessibility_permission,
             commands::llm_correction::correct_transcript,

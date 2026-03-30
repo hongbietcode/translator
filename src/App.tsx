@@ -7,7 +7,6 @@ import { useAudioCapture } from "@/hooks/use-audio-capture";
 import { useHistory } from "@/hooks/use-history";
 import { useTranscript } from "@/hooks/use-transcript";
 import { useSoniox } from "@/hooks/use-soniox";
-import { useAiService } from "@/hooks/use-ai-service";
 import { OverlayView } from "@/components/overlay-view";
 import { SettingsView } from "@/components/settings-view";
 import { HistoryView } from "@/components/history-view";
@@ -21,7 +20,6 @@ export default function App() {
   const history = useHistory();
   const { appendTranscript } = useTranscript();
   const soniox = useSoniox();
-  const ai = useAiService();
 
   const [currentView, setCurrentView] = useState<View>("overlay");
   const [currentSource, setCurrentSource] = useState("system");
@@ -34,12 +32,6 @@ export default function App() {
       setCurrentSource(settings.audio_source === "both" ? "system" : settings.audio_source || "system");
     }
   }, [isLoading, settings.audio_source]);
-
-  useEffect(() => {
-    if (!isLoading && settings.ai_enabled && settings.anthropic_api_key) {
-      ai.configure(settings.anthropic_api_key, settings.ai_model);
-    }
-  }, [isLoading, settings.ai_enabled, settings.anthropic_api_key, settings.ai_model]);
 
   useEffect(() => {
     soniox.onTranslationRef.current = (text: string) => {
@@ -56,12 +48,6 @@ export default function App() {
       soniox.sendAudio(pcm.slice().buffer as ArrayBuffer);
     });
   }, [setOnAudioData, soniox]);
-
-  useEffect(() => {
-    if (settings.ai_enabled && soniox.segments.length > 0) {
-      ai.syncTranscript(soniox.segments);
-    }
-  }, [settings.ai_enabled, soniox.segments]);
 
   const start = useCallback(async () => {
     if (!settings.soniox_api_key) {
@@ -141,47 +127,6 @@ export default function App() {
     soniox.clearSegments();
   }, [soniox]);
 
-  const handleToggleAi = useCallback(async () => {
-    const newVal = !settings.ai_enabled;
-    await updateSettings({ ai_enabled: newVal });
-    if (newVal && settings.anthropic_api_key) {
-      const ok = await ai.configure(settings.anthropic_api_key, settings.ai_model);
-      if (!ok) showToast("AI configuration failed. Check your API key.", "error");
-    }
-  }, [settings, updateSettings, ai]);
-
-  const handleAskAi = useCallback(
-    (segmentIndex: number) => {
-      const seg = soniox.segments[segmentIndex];
-      if (!seg) return;
-
-      const start = Math.max(0, segmentIndex - 5);
-      const context = soniox.segments.slice(start, segmentIndex + 1).map((s) => ({
-        text: s.original,
-        translation: s.translation ?? undefined,
-        speaker: s.speaker ?? undefined,
-        timestamp: s.createdAt,
-      }));
-
-      const question = `Analyze this statement and suggest how to respond:\n"${seg.translation || seg.original}"`;
-      ai.askAi(question, context);
-    },
-    [soniox.segments, ai],
-  );
-
-  const handleAiSend = useCallback(
-    (question: string) => {
-      const recent = soniox.segments.slice(-5).map((s) => ({
-        text: s.original,
-        translation: s.translation ?? undefined,
-        speaker: s.speaker ?? undefined,
-        timestamp: s.createdAt,
-      }));
-      ai.askAi(question, recent);
-    },
-    [soniox.segments, ai],
-  );
-
   const handleExportSession = useCallback(
     (sessionId: number) => {
       const text = history.exportSession(sessionId);
@@ -209,8 +154,6 @@ export default function App() {
       const isTraySettingsEvent =
         id.startsWith("lang-source-") ||
         id.startsWith("lang-target-") ||
-        id.startsWith("ai-model-") ||
-        id === "ai-toggle" ||
         id === "source-system" ||
         id === "source-mic" ||
         id === "source-both";
@@ -264,22 +207,13 @@ export default function App() {
           showOriginal={settings.show_original}
           backgroundColor={settings.background_color}
           textColor={settings.text_color}
-          aiEnabled={settings.ai_enabled}
-          aiMessages={ai.messages}
-          aiStreaming={ai.isStreaming}
-          aiConfigured={ai.isConfigured}
           onToggle={toggle}
           onSourceChange={handleSourceChange}
           onClear={handleClear}
-          onToggleAi={handleToggleAi}
           subtitleMode={settings.subtitle_mode}
           onToggleSubtitle={() => updateSettings({ subtitle_mode: !settings.subtitle_mode })}
           onMinimize={() => getCurrentWindow().minimize()}
           onClose={() => getCurrentWindow().close()}
-          onAskAi={handleAskAi}
-          onAiSend={handleAiSend}
-          onAiStop={ai.stopStreaming}
-          onAiClear={ai.clearMessages}
         />
       )}
       {currentView === "settings" && (

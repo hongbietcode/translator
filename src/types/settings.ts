@@ -19,9 +19,6 @@ export interface Settings {
   subtitle_bg_color: string;
   subtitle_text_color: string;
   subtitle_show_original: boolean;
-  anthropic_api_key: string;
-  ai_enabled: boolean;
-  ai_model: string;
   voice_input_shortcut: string;
   voice_stop_word: string;
   voice_enter_mode: boolean;
@@ -49,9 +46,6 @@ export const DEFAULT_SETTINGS: Settings = {
   subtitle_bg_color: "rgba(0,0,0,0.75)",
   subtitle_text_color: "#ffffff",
   subtitle_show_original: true,
-  anthropic_api_key: "",
-  ai_enabled: false,
-  ai_model: "claude-haiku-4-5-20251001",
   voice_input_shortcut: "CmdOrCtrl+L",
   voice_stop_word: "",
   voice_enter_mode: false,
