@@ -254,7 +254,7 @@ pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
         .unwrap_or((1440.0, 900.0));
 
     let win_w = 480.0;
-    let win_h = 48.0;
+    let win_h = 44.0;
     let x = (screen_w - win_w) / 2.0;
     let y = screen_h - win_h - 80.0;
 
