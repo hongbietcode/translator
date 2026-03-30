@@ -28,3 +28,4 @@ src-tauri/gen/
 *.log
 repomix-output.xml
 package-lock.json
+.claude/session-state/
