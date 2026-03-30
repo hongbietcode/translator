@@ -222,7 +222,6 @@ pub fn open_settings_window(handle: &AppHandle) -> tauri::Result<()> {
 pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
     if let Some(win) = handle.get_webview_window("voice-input") {
         let _ = win.show();
-        let _ = win.set_focus();
         return Ok(());
     }
 
@@ -239,6 +238,18 @@ pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
     .resizable(false)
     .center()
     .build()?;
+
+    #[cfg(target_os = "macos")]
+    {
+        use objc2::msg_send;
+        let ns_win = _win.ns_window().unwrap() as *mut objc2::runtime::AnyObject;
+        unsafe {
+            let style_mask: usize = msg_send![ns_win, styleMask];
+            let non_activating: usize = 1 << 7;
+            let _: () = msg_send![ns_win, setStyleMask: style_mask | non_activating];
+            let _: () = msg_send![ns_win, setHidesOnDeactivate: false];
+        }
+    }
 
     Ok(())
 }
