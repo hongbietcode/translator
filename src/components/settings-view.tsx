@@ -153,9 +153,17 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
     <div className="view-shell">
       <div className="view-header">
         <h2 className="view-header-title">Settings</h2>
+        <button onClick={handleSave} className="btn-save-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Save
+        </button>
       </div>
 
       <div className="s-body">
+        <div className="s-section-title">General</div>
+
         <div className="s-card">
           <div className="s-card-header">
             <KeyIcon />
@@ -255,6 +263,8 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
           </div>
         </div>
 
+        <div className="s-section-title">Display</div>
+
         <div className="s-card">
           <div className="s-card-header">
             <MonitorIcon />
@@ -345,6 +355,8 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
             </div>
           </label>
         </div>
+
+        <div className="s-section-title">Voice Input</div>
 
         <div className="s-card">
           <div className="s-card-header">
@@ -531,12 +543,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
           )}
         </div>
 
-        <button onClick={handleSave} className="btn-save">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Save & Close
-        </button>
       </div>
     </div>
   );
