@@ -40,8 +40,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [subtitleBgColor, setSubtitleBgColor] = useState("rgba(0,0,0,0.75)");
   const [subtitleTextColor, setSubtitleTextColor] = useState("#ffffff");
   const [subtitleShowOriginal, setSubtitleShowOriginal] = useState(true);
-  const [contextDomain, setContextDomain] = useState("");
-  const [contextTerms, setContextTerms] = useState("");
   const [vocabTerms, setVocabTerms] = useState<string[]>([]);
   const [vocabInput, setVocabInput] = useState("");
   const [voiceShortcut, setVoiceShortcut] = useState("CmdOrCtrl+L");
@@ -70,8 +68,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
     setSubtitleBgColor(settings.subtitle_bg_color || "rgba(0,0,0,0.75)");
     setSubtitleTextColor(settings.subtitle_text_color || "#ffffff");
     setSubtitleShowOriginal(settings.subtitle_show_original !== false);
-    setContextDomain(settings.custom_context?.domain || "");
-    setContextTerms((settings.custom_context?.terms || []).join(", "));
     setVocabTerms(settings.vocabulary_terms || []);
     setVoiceShortcut(settings.voice_input_shortcut || "CmdOrCtrl+L");
     setVoiceStopWord(settings.voice_stop_word || "");
@@ -99,7 +95,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
       subtitle_bg_color: subtitleBgColor,
       subtitle_text_color: subtitleTextColor,
       subtitle_show_original: subtitleShowOriginal,
-      custom_context: null,
       vocabulary_terms: vocabTerms,
       voice_input_shortcut: voiceShortcut,
       voice_stop_word: voiceStopWord,
@@ -111,15 +106,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
       llm_correction_model: llmModel.trim(),
       llm_correction_language: llmLanguage,
     };
-
-    const domain = contextDomain.trim();
-    if (domain) {
-      const terms = contextTerms
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
-      newSettings.custom_context = { domain, terms };
-    }
 
     try {
       await onSave(newSettings);
@@ -358,35 +344,6 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
               <div className="s-switch-thumb" />
             </div>
           </label>
-        </div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <DocIcon />
-            <span>Context</span>
-            <span className="s-badge">Optional</span>
-          </div>
-          <div className="s-field">
-            <span className="s-field-label">Domain</span>
-            <input
-              type="text"
-              value={contextDomain}
-              onChange={(e) => setContextDomain(e.target.value)}
-              placeholder="e.g. Meeting, Technical, Medical..."
-              className="input-field"
-            />
-          </div>
-          <div className="s-field" style={{ marginTop: 8 }}>
-            <span className="s-field-label">Terms</span>
-            <input
-              type="text"
-              value={contextTerms}
-              onChange={(e) => setContextTerms(e.target.value)}
-              placeholder="e.g. sprint, deploy, kubernetes..."
-              className="input-field"
-            />
-          </div>
-          <p className="s-hint">Comma-separated terms to improve accuracy</p>
         </div>
 
         <div className="s-card">
