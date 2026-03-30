@@ -7,89 +7,75 @@ interface VoiceInputOverlayProps {
   onCancel: () => void;
 }
 
-export function VoiceInputOverlay({
-  state,
-  onEnd,
-  onCancel,
-}: VoiceInputOverlayProps) {
-  const phase = state.phase;
-  const titleMap: Record<string, string> = {
-    idle: "Ready",
-    listening: "Listening...",
-    finalizing: "Processing...",
-    correcting: "Correcting...",
-    inserting: "Inserting...",
-    done: "Done",
-    error: "Error",
-  };
+const STATE_LABELS: Record<string, string> = {
+  idle: "READY",
+  listening: "LISTENING",
+  finalizing: "PROCESSING",
+  correcting: "CORRECTING",
+  inserting: "INSERTING",
+  done: "DONE",
+  error: "ERROR",
+};
 
-  const liveText =
+export function VoiceInputOverlay({ state, onEnd, onCancel }: VoiceInputOverlayProps) {
+  const phase = state.phase;
+
+  const finalText =
     phase === "listening"
-      ? (state.transcript + (state.provisional ? " " + state.provisional : "")).trim()
-      : "";
+      ? state.transcript
+      : phase === "done"
+        ? state.text.length > 60 ? state.text.slice(0, 60) + "..." : state.text
+        : phase === "error"
+          ? state.message
+          : phase === "correcting" || phase === "finalizing"
+            ? state.transcript
+            : phase === "inserting"
+              ? state.text
+              : "";
+
+  const interimText = phase === "listening" ? state.provisional : "";
+  const showPrompt = phase === "listening" && !state.transcript && !state.provisional;
 
   return (
     <div
       className="vi-shell"
+      data-state={phase}
       onMouseDown={(e) => {
-        if ((e.target as HTMLElement).closest("button, .vi-text")) return;
+        if ((e.target as HTMLElement).closest("button")) return;
         getCurrentWindow().startDragging();
       }}
     >
-      <div className="vi-header">
-        <div className="vi-header-left">
-          {phase === "listening" && <span className="vi-rec-dot" />}
-          {(phase === "finalizing" || phase === "correcting" || phase === "inserting") && (
-            <span className="vi-spinner" />
-          )}
-          {phase === "done" && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          )}
-          <span className="vi-title">{titleMap[phase]}</span>
-        </div>
-        <button className="vi-close" onClick={onCancel} title="Cancel (Esc)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
+      <span className="vi-status-dot" />
+
+      <div className="vi-transcript">
+        {showPrompt ? (
+          <span className="vi-transcript-prompt">Listening...</span>
+        ) : (
+          <>
+            <span className="vi-transcript-final">{finalText}</span>
+            {interimText && <span className="vi-transcript-interim">{interimText}</span>}
+          </>
+        )}
       </div>
 
-      <div className="vi-body">
+      <span className="vi-state-label">{STATE_LABELS[phase]}</span>
+
+      <div className="vi-sep" />
+
+      <div className="vi-actions">
         {phase === "listening" && (
-          <>
-            <div className="vi-text">{liveText || "Speak now..."}</div>
-            <div className="vi-actions">
-              <button className="vi-btn vi-btn--primary" onClick={onEnd}>
-                End & Insert
-              </button>
-            </div>
-          </>
+          <button className="vi-btn" onClick={onEnd} title="End & Insert (Enter)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </button>
         )}
-
-        {(phase === "finalizing" || phase === "correcting" || phase === "inserting") && (
-          <div className="vi-text vi-text--muted">
-            {phase === "correcting" && "Correcting transcript..."}
-            {phase === "inserting" && "Inserting text..."}
-            {phase === "finalizing" && "Finalizing..."}
-          </div>
-        )}
-
-        {phase === "done" && (
-          <div className="vi-text vi-text--result">
-            {state.text.length > 80 ? state.text.slice(0, 80) + "..." : state.text}
-          </div>
-        )}
-
-        {phase === "error" && (
-          <>
-            <div className="vi-text vi-text--error">{state.message}</div>
-            <div className="vi-actions">
-              <button className="vi-btn" onClick={onCancel}>Close</button>
-            </div>
-          </>
-        )}
+        <button className="vi-btn" onClick={onCancel} title="Cancel (Esc)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
     </div>
   );

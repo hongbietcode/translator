@@ -42,6 +42,8 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [subtitleShowOriginal, setSubtitleShowOriginal] = useState(true);
   const [contextDomain, setContextDomain] = useState("");
   const [contextTerms, setContextTerms] = useState("");
+  const [vocabTerms, setVocabTerms] = useState<string[]>([]);
+  const [vocabInput, setVocabInput] = useState("");
   const [voiceShortcut, setVoiceShortcut] = useState("CmdOrCtrl+L");
   const [voiceStopWord, setVoiceStopWord] = useState("");
   const [voiceEnterMode, setVoiceEnterMode] = useState(false);
@@ -70,6 +72,7 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
     setSubtitleShowOriginal(settings.subtitle_show_original !== false);
     setContextDomain(settings.custom_context?.domain || "");
     setContextTerms((settings.custom_context?.terms || []).join(", "));
+    setVocabTerms(settings.vocabulary_terms || []);
     setVoiceShortcut(settings.voice_input_shortcut || "CmdOrCtrl+L");
     setVoiceStopWord(settings.voice_stop_word || "");
     setVoiceEnterMode(settings.voice_enter_mode || false);
@@ -97,6 +100,7 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
       subtitle_text_color: subtitleTextColor,
       subtitle_show_original: subtitleShowOriginal,
       custom_context: null,
+      vocabulary_terms: vocabTerms,
       voice_input_shortcut: voiceShortcut,
       voice_stop_word: voiceStopWord,
       voice_enter_mode: voiceEnterMode,
@@ -383,6 +387,59 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
             />
           </div>
           <p className="s-hint">Comma-separated terms to improve accuracy</p>
+        </div>
+
+        <div className="s-card">
+          <div className="s-card-header">
+            <DocIcon />
+            <span>Vocabulary</span>
+            {vocabTerms.length > 0 && <span className="s-badge">{vocabTerms.length}</span>}
+          </div>
+          <div className="s-tag-list">
+            {vocabTerms.map((term, i) => (
+              <span key={i} className="s-tag">
+                {term}
+                <button
+                  className="s-tag-remove"
+                  onClick={() => setVocabTerms(vocabTerms.filter((_, j) => j !== i))}
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="s-key-row" style={{ marginTop: 8 }}>
+            <input
+              type="text"
+              value={vocabInput}
+              onChange={(e) => setVocabInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const term = vocabInput.trim();
+                  if (term && !vocabTerms.includes(term)) {
+                    setVocabTerms([...vocabTerms, term]);
+                    setVocabInput("");
+                  }
+                }
+              }}
+              placeholder="Add term..."
+              className="input-field"
+            />
+            <button
+              className="s-icon-btn"
+              onClick={() => {
+                const term = vocabInput.trim();
+                if (term && !vocabTerms.includes(term)) {
+                  setVocabTerms([...vocabTerms, term]);
+                  setVocabInput("");
+                }
+              }}
+            >
+              Add
+            </button>
+          </div>
+          <p className="s-hint">Custom words/names to improve speech recognition accuracy</p>
         </div>
 
         <div className="s-card">

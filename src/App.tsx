@@ -66,6 +66,7 @@ export default function App() {
       sourceLanguage: settings.source_language,
       targetLanguage: settings.target_language,
       customContext: settings.custom_context,
+      vocabularyTerms: settings.vocabulary_terms,
     });
 
     try {

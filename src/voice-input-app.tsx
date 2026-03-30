@@ -65,6 +65,7 @@ export function VoiceInputApp() {
       sourceLanguage: settings.target_language || "auto",
       targetLanguage: "",
       customContext: null,
+      vocabularyTerms: settings.vocabulary_terms,
       endpointDelayMs: settings.voice_endpoint_delay_ms,
     });
 

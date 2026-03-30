@@ -232,8 +232,9 @@ pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
         WebviewUrl::App("voice-input.html".into()),
     )
     .title("Voice Input")
-    .inner_size(420.0, 180.0)
+    .inner_size(480.0, 48.0)
     .decorations(false)
+    .transparent(true)
     .always_on_top(true)
     .resizable(false)
     .center()

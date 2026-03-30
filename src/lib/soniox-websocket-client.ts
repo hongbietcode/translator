@@ -9,6 +9,7 @@ export interface SonioxConfig {
   sourceLanguage: string;
   targetLanguage: string;
   customContext?: { domain: string; terms: string[] } | null;
+  vocabularyTerms?: string[];
   endpointDelayMs?: number;
 }
 
@@ -119,11 +120,13 @@ export class SonioxWebSocketClient {
       }
 
       const domain = this.buildDomain(config.customContext, carryoverContext);
-      const terms = config.customContext?.terms || [];
-      if (domain || terms.length > 0) {
+      const contextTerms = config.customContext?.terms || [];
+      const vocabTerms = config.vocabularyTerms || [];
+      const allTerms = [...new Set([...contextTerms, ...vocabTerms])];
+      if (domain || allTerms.length > 0) {
         configMsg.context = {
           ...(domain ? { domain } : {}),
-          ...(terms.length > 0 ? { terms } : {}),
+          ...(allTerms.length > 0 ? { terms: allTerms } : {}),
         };
       }
 

@@ -90,6 +90,7 @@ export function CaptionApp() {
       sourceLanguage: settings.source_language,
       targetLanguage: settings.target_language,
       customContext: settings.custom_context,
+      vocabularyTerms: settings.vocabulary_terms,
     });
 
     try {
@@ -208,6 +209,7 @@ export function CaptionApp() {
         sourceLanguage: settings.source_language,
         targetLanguage: settings.target_language,
         customContext: settings.custom_context,
+      vocabularyTerms: settings.vocabulary_terms,
       });
     }
   }, [settings.source_language, settings.target_language, settings.soniox_api_key, settings.custom_context, soniox]);

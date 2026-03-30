@@ -19,6 +19,7 @@ export interface Settings {
   subtitle_bg_color: string;
   subtitle_text_color: string;
   subtitle_show_original: boolean;
+  vocabulary_terms: string[];
   voice_input_shortcut: string;
   voice_stop_word: string;
   voice_enter_mode: boolean;
@@ -46,6 +47,7 @@ export const DEFAULT_SETTINGS: Settings = {
   subtitle_bg_color: "rgba(0,0,0,0.75)",
   subtitle_text_color: "#ffffff",
   subtitle_show_original: true,
+  vocabulary_terms: [],
   voice_input_shortcut: "CmdOrCtrl+L",
   voice_stop_word: "",
   voice_enter_mode: false,

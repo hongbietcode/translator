@@ -52,6 +52,9 @@ pub struct Settings {
     /// Whether to show original text in subtitle overlay
     #[serde(default = "default_true")]
     pub subtitle_show_original: bool,
+    /// Vocabulary terms for improved Soniox recognition
+    #[serde(default)]
+    pub vocabulary_terms: Vec<String>,
     /// Global shortcut for voice input
     #[serde(default = "default_voice_input_shortcut")]
     pub voice_input_shortcut: String,
@@ -127,6 +130,7 @@ impl Default for Settings {
             subtitle_bg_color: default_subtitle_bg_color(),
             subtitle_text_color: default_subtitle_text_color(),
             subtitle_show_original: true,
+            vocabulary_terms: Vec::new(),
             voice_input_shortcut: default_voice_input_shortcut(),
             voice_stop_word: String::new(),
             voice_enter_mode: false,
