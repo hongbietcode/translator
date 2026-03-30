@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useSettings } from "@/hooks/use-settings";
 import { useAudioCapture } from "@/hooks/use-audio-capture";
@@ -155,6 +156,15 @@ export function VoiceInputApp() {
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [sm.state.phase, closeWindow, handleEnd]);
+
+  useEffect(() => {
+    const unlisten = listen("shortcut-end", () => {
+      if (sm.state.phase === "listening") {
+        handleEndRef.current?.();
+      }
+    });
+    return () => { unlisten.then((fn) => fn()); };
+  }, [sm.state.phase]);
 
   useEffect(() => {
     const unlisten = getCurrentWindow().onCloseRequested(async () => {

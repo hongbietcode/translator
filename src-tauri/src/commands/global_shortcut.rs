@@ -1,6 +1,6 @@
 use crate::settings::SettingsState;
 use crate::tray;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 /// Update the voice input global shortcut with transactional rollback
@@ -27,7 +27,11 @@ pub fn update_voice_input_shortcut(
 
     if let Err(e) = app.global_shortcut().on_shortcut(new_parsed, |app, _shortcut, event| {
         if event.state == ShortcutState::Pressed {
-            let _ = tray::open_voice_input_window(app);
+            if let Some(win) = app.get_webview_window("voice-input") {
+                let _ = win.emit("shortcut-end", ());
+            } else {
+                let _ = tray::open_voice_input_window(app);
+            }
         }
     }) {
         if let Ok(old_parsed) = old_shortcut_str.parse::<Shortcut>() {

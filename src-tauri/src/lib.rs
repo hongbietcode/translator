@@ -10,7 +10,7 @@ use settings::{Settings, SettingsState};
 use std::sync::Mutex;
 use tauri::{
     tray::TrayIconBuilder,
-    Manager, ActivationPolicy,
+    Emitter, Manager, ActivationPolicy,
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
@@ -67,7 +67,11 @@ pub fn run() {
                 .unwrap_or_else(|_| "CmdOrCtrl+L".parse().unwrap());
             app.global_shortcut().on_shortcut(shortcut, |app, _shortcut, event| {
                 if event.state == ShortcutState::Pressed {
-                    let _ = tray::open_voice_input_window(app);
+                    if let Some(win) = app.get_webview_window("voice-input") {
+                        let _ = win.emit("shortcut-end", ());
+                    } else {
+                        let _ = tray::open_voice_input_window(app);
+                    }
                 }
             })?;
 
