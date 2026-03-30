@@ -9,6 +9,7 @@ export interface SonioxConfig {
   sourceLanguage: string;
   targetLanguage: string;
   customContext?: { domain: string; terms: string[] } | null;
+  endpointDelayMs?: number;
 }
 
 export type SonioxStatus = "disconnected" | "connecting" | "connected" | "error";
@@ -101,7 +102,7 @@ export class SonioxWebSocketClient {
         sample_rate: 16000,
         num_channels: 1,
         enable_endpoint_detection: true,
-        max_endpoint_delay_ms: 1500,
+        max_endpoint_delay_ms: config.endpointDelayMs || 1500,
         enable_speaker_diarization: true,
       };
 

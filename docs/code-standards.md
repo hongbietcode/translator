@@ -1,6 +1,6 @@
 # Code Standards — Personal Translator
 
-**Last Updated:** 2026-03-14
+**Last Updated:** 2026-03-30
 **Applies To:** Frontend (React/TypeScript), Backend (Rust)
 
 ## Frontend Code Standards (React 19 + TypeScript)
@@ -10,12 +10,15 @@
 #### Component Files (`.tsx`)
 ```
 src/components/
-├── component-name.tsx          # PascalCase component name (self-contained)
-├── another-feature.tsx         # One component per file (exceptions: small groups)
+├── overlay-view.tsx            # Main translation display
+├── settings-view.tsx           # Settings configuration
+├── voice-input-overlay.tsx     # Voice recording visual feedback (NEW)
+├── history-view.tsx            # Session archive
 └── ...
 ```
 
 **File naming rule:** Use kebab-case file names (lowercase with hyphens), exported component is PascalCase.
+**New component (v0.2.0):** `VoiceInputOverlay` shows recording state during voice input.
 
 Example:
 ```typescript
@@ -26,21 +29,27 @@ export default function OverlayView() { ... }
 #### Hook Files (`.ts`)
 ```
 src/hooks/
-├── use-settings.ts             # Lowercase kebab-case with `use-` prefix
-├── use-audio-capture.ts
-├── use-soniox.ts
+├── use-settings.ts             # Settings state management
+├── use-audio-capture.ts        # Audio capture lifecycle
+├── use-soniox.ts               # WebSocket client for STT/translation
+├── use-voice-input-state-machine.ts  # Voice recording state (NEW v0.2.0)
+├── use-history.ts              # Session history management
 └── ...
 ```
 
 **Rule:** Custom hooks start with `use-` prefix, kebab-case filename.
+**New hook (v0.2.0):** `useVoiceInputStateMachine` orchestrates voice input workflow.
 
 #### Utility & Library Files (`.ts`)
 ```
 src/lib/
-├── soniox-websocket-client.ts  # Kebab-case for files
-├── utils.ts
+├── soniox-websocket-client.ts  # WebSocket client for Soniox API
+├── stop-word-detection.ts      # Stop word detector (NEW v0.2.0)
+├── utils.ts                    # General utilities
 └── ...
 ```
+
+**New utility (v0.2.0):** `stop-word-detection.ts` detects configured stop words in transcript stream.
 
 #### Types/Interfaces (`.ts`)
 ```
@@ -349,13 +358,17 @@ src-tauri/src/
 │   ├── mod.rs                  # Command module exports
 │   ├── audio.rs                # start_capture, stop_capture
 │   ├── settings.rs             # get_settings, save_settings
-│   └── transcript.rs           # save_transcript
-├── settings.rs                 # Settings struct + persistence logic
+│   ├── transcript.rs           # save_transcript
+│   ├── text_inserter.rs        # insert_text_at_cursor (NEW v0.2.0)
+│   ├── global_shortcut.rs      # register_hotkey, unregister_hotkey (NEW v0.2.0)
+│   └── llm_correction.rs       # correct_transcript (NEW v0.2.0)
+├── settings.rs                 # Settings struct + persistence logic (9 new fields)
 ├── lib.rs                      # Crate root
 └── main.rs                     # Tauri app entry
 ```
 
 **Rule:** Use snake_case for all Rust files (Rust ecosystem convention).
+**New commands (v0.2.0):** Text insertion, global hotkey management, LLM correction integration.
 
 ### Module Exports
 

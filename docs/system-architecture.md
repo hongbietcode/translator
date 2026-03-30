@@ -1,6 +1,6 @@
 # System Architecture — Personal Translator
 
-**Last Updated:** 2026-03-14
+**Last Updated:** 2026-03-30
 **Architecture Pattern:** Event-Driven, React Hooks + Tauri IPC
 **Deployment Target:** macOS (13+)
 
@@ -53,8 +53,9 @@ Personal Translator is a single-window Tauri desktop application with a React 19
 
 **Components:**
 - `OverlayView` — Main translating display (segments, provisional text, controls)
-- `SettingsView` — Configuration form (API key, languages, audio source, styling)
+- `SettingsView` — Configuration form (API key, languages, audio source, voice input, LLM correction)
 - `HistoryView` — Session archive browser and export interface
+- `VoiceInputOverlay` — Visual feedback during voice recording with state indicator
 - `TitleBar` — macOS window chrome (close, minimize, maximize)
 - `SourceSelector` — Audio source radio picker
 - `TranscriptDisplay` — Renderer for transcript segments with speaker labels
@@ -297,7 +298,6 @@ pub async fn start_capture(
     device: Option<String>,
     app: tauri::AppHandle,
 ) -> Result<(), String> {
-    // Validate source
     match source.as_str() {
         "system" => SystemAudioCapture::start(app)?,
         "microphone" => MicrophoneCapture::start(&device, app)?,
@@ -308,7 +308,6 @@ pub async fn start_capture(
 
 #[tauri::command]
 pub async fn stop_capture() -> Result<(), String> {
-    // Stop active capture and emit final events
     Ok(())
 }
 ```
@@ -322,7 +321,7 @@ pub fn get_settings() -> Result<Settings, String> {
 
 #[tauri::command]
 pub fn save_settings(new_settings: Settings) -> Result<(), String> {
-    // Persist to config file
+    // Persist to config file, register global hotkey if changed
 }
 ```
 
@@ -334,34 +333,71 @@ pub async fn save_transcript(filename: String, content: String) -> Result<(), St
 }
 ```
 
-#### Settings Persistence (`settings.rs`)
-
+**Text Insertion Commands** (`text_inserter.rs`)
 ```rust
-pub struct Settings {
-    pub soniox_api_key: String,
-    pub source_language: String,
-    pub target_language: String,
-    pub audio_source: String,
-    pub overlay_opacity: f32,
-    pub font_size: i32,
-    pub max_lines: i32,
-    pub show_original: bool,
-    pub custom_context: Option<CustomContext>,
+#[tauri::command]
+pub async fn insert_text_at_cursor(text: String) -> Result<(), String> {
+    // Use AppleScript to insert text at cursor, preserve clipboard
+}
+```
+
+**Global Hotkey Commands** (`global_shortcut.rs`)
+```rust
+#[tauri::command]
+pub async fn register_hotkey(hotkey: String, app: tauri::AppHandle) -> Result<(), String> {
+    // Register global hotkey, auto-rollback on failure
 }
 
-// Serialized to JSON:
-// {
-//   "soniox_api_key": "sk_...",
-//   "source_language": "auto",
-//   "target_language": "vi",
-//   "audio_source": "system",
-//   "overlay_opacity": 0.85,
-//   "font_size": 16,
-//   "max_lines": 5,
-//   "show_original": true,
-//   "custom_context": null
-// }
+#[tauri::command]
+pub async fn unregister_hotkey(hotkey: String) -> Result<(), String> {
+    // Unregister previous hotkey cleanly
+}
 ```
+
+**LLM Correction Commands** (`llm_correction.rs`)
+```rust
+#[tauri::command]
+pub async fn correct_transcript(
+    text: String,
+    api_key: String,
+    base_url: String,
+    model: String,
+    language: String,
+) -> Result<String, String> {
+    // Call OpenAI-compatible API for correction
+}
+```
+
+#### Settings Persistence (`settings.rs`)
+
+**Core Settings:**
+- `soniox_api_key` — API key for Soniox STT/translation
+- `source_language`, `target_language` — Language pair configuration
+- `audio_source` — "system" | "microphone" | "both"
+- `overlay_opacity`, `font_size`, `max_lines`, `show_original` — Display styling
+
+**Voice Input Settings:**
+- `voice_input_shortcut` — Global hotkey (default: "CmdOrCtrl+L")
+- `voice_stop_word` — Word to auto-end recording (empty = disabled)
+- `voice_enter_mode` — Auto-press Enter after text insertion
+- `voice_endpoint_delay_ms` — Silence threshold in ms (default: 1500)
+
+**LLM Correction Settings:**
+- `llm_correction_enabled` — Enable/disable feature
+- `llm_correction_api_key` — OpenAI-compatible API key
+- `llm_correction_base_url` — API endpoint (default: https://api.openai.com/v1)
+- `llm_correction_model` — Model name (default: gpt-4o-mini)
+- `llm_correction_language` — Target language for correction (default: auto)
+
+**AI Assistant Settings:**
+- `ai_enabled` — Enable/disable Claude integration
+- `ai_model` — Claude model to use
+- `anthropic_api_key` — Anthropic API key
+
+**Subtitle/UI Settings:**
+- `subtitle_mode` — Netflix-style overlay mode
+- `subtitle_font_size`, `subtitle_bg_color`, `subtitle_text_color` — Subtitle styling
+- `background_color`, `text_color` — Caption window styling
 
 ---
 
@@ -410,6 +446,44 @@ interface SonioxToken {
 - Soniox resets session after 3 minutes of streaming
 - Triggers automatic reconnect with same config
 - Prevents context pollution from long sessions
+
+#### Hook: `useVoiceInputStateMachine` (New v0.2.0)
+```typescript
+export function useVoiceInputStateMachine() {
+  const [state, setState] = useState<VoiceState>("idle");
+
+  // State transitions: idle → listening → finalizing → correcting → inserting → done
+  const startListening = useCallback(async () => {
+    setState("listening");
+    // Begin audio capture, detect stop word, handle endpoint detection
+  }, []);
+
+  const stop = useCallback(async (transcript: string) => {
+    setState("finalizing");
+    // Optionally call LLM correction if enabled
+    if (llmEnabled) {
+      setState("correcting");
+      const corrected = await correctTranscript(transcript);
+      setState("inserting");
+      await insertText(corrected);
+    } else {
+      setState("inserting");
+      await insertText(transcript);
+    }
+    setState("done");
+    setTimeout(() => setState("idle"), 1000);
+  }, [llmEnabled]);
+
+  return { state, startListening, stop };
+}
+```
+**Manages:** Voice input state machine, orchestrates stop word detection and text insertion.
+
+#### Stop Word Detection (`src/lib/stop-word-detection.ts` — New v0.2.0)
+- Monitors transcript stream for configured stop word
+- Case-insensitive matching with whole-word boundaries
+- Triggers automatic recording stop
+- Configurable per user settings
 
 ---
 

@@ -22,6 +22,15 @@ export interface Settings {
   anthropic_api_key: string;
   ai_enabled: boolean;
   ai_model: string;
+  voice_input_shortcut: string;
+  voice_stop_word: string;
+  voice_enter_mode: boolean;
+  voice_endpoint_delay_ms: number;
+  llm_correction_enabled: boolean;
+  llm_correction_api_key: string;
+  llm_correction_base_url: string;
+  llm_correction_model: string;
+  llm_correction_language: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -43,4 +52,13 @@ export const DEFAULT_SETTINGS: Settings = {
   anthropic_api_key: "",
   ai_enabled: false,
   ai_model: "claude-haiku-4-5-20251001",
+  voice_input_shortcut: "CmdOrCtrl+L",
+  voice_stop_word: "",
+  voice_enter_mode: false,
+  voice_endpoint_delay_ms: 1500,
+  llm_correction_enabled: false,
+  llm_correction_api_key: "",
+  llm_correction_base_url: "https://api.openai.com/v1",
+  llm_correction_model: "gpt-4o-mini",
+  llm_correction_language: "auto",
 };

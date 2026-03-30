@@ -1,8 +1,8 @@
 # Project Overview & Product Development Requirements
 
 **Project:** Personal Translator
-**Version:** 0.1.0
-**Last Updated:** 2026-03-14
+**Version:** 0.2.0 (In Development)
+**Last Updated:** 2026-03-30
 **Status:** Active Development
 **Platform:** macOS (13+)
 
@@ -44,18 +44,33 @@ Personal Translator is a lightweight, privacy-focused desktop application for re
    - UI customization (font size, opacity)
    - Session history export
 
-### Secondary Goals (Backlog)
+### Secondary Goals (In Progress — v0.2.0)
+
+1. **Voice Input & Text Insertion** ✅
+   - Hands-free recording with customizable hotkey
+   - Stop word detection for auto-stop
+   - Text insertion at cursor via AppleScript
+   - State machine: IDLE → LISTENING → FINALIZING → CORRECTING → INSERTING → DONE
+
+2. **LLM Transcript Correction** ✅
+   - OpenAI-compatible API support (any provider)
+   - Grammar, punctuation, formatting fixes
+   - Language-aware output
+
+3. **Global Hotkey Management** ✅
+   - Dynamic hotkey registration from settings
+   - Rollback on registration failure
+
+### Backlog
 
 - [ ] Performance optimization (CPU/memory profiling)
 - [ ] Auto-update mechanism
-- [ ] Keyboard shortcut customization
 - [ ] Translation quality analytics
 - [ ] Dark/light theme toggle
 - [ ] Multi-window support (watch on secondary monitor)
 - [ ] Cloud sync of settings/history
 - [ ] TTS output (read back translation)
 - [ ] Export to SRT/VTT format
-- [ ] Custom hotkey configuration
 
 ---
 
@@ -132,17 +147,22 @@ Personal Translator is a lightweight, privacy-focused desktop application for re
 | Aspect | Requirement | Status |
 |--------|-------------|--------|
 | Settings file | ~/.config/personal-translator/settings.json | ✅ Complete |
-| Fields | API key, languages, audio source, opacity, font size | ✅ Complete |
+| Core fields | API key, languages, audio source, opacity, font size, max_lines | ✅ Complete |
+| UI customization | Font size, colors, background for both modes | ✅ Complete |
+| Voice input fields | voice_input_shortcut, voice_stop_word, voice_enter_mode, voice_endpoint_delay_ms | ✅ Complete |
+| LLM correction fields | llm_correction_enabled, api_key, base_url, model, language | ✅ Complete |
+| AI assistant fields | ai_enabled, ai_model, anthropic_api_key | ✅ Complete |
 | Validation | API key required to start, graceful errors | ✅ Complete |
-| Defaults | Sensible defaults (vi target lang, system audio) | ✅ Complete |
+| Defaults | Sensible defaults (vi target lang, system audio, Cmd+L hotkey) | ✅ Complete |
 | Persistence | Survive app restart | ✅ Complete |
-| Privacy | API key not logged or leaked | ✅ Complete |
+| Privacy | API keys not logged or leaked | ✅ Complete |
 
 **Acceptance Criteria:**
 - Settings load on startup
 - Edits save immediately
 - No data corruption on crash
 - Defaults work without config file
+- All 9 new fields persist correctly
 
 ---
 
@@ -163,6 +183,70 @@ Personal Translator is a lightweight, privacy-focused desktop application for re
 - Export preserves formatting
 - No data loss on clear (maybe add undo later)
 - File I/O doesn't block UI
+
+---
+
+### FR-6: Voice Input & Text Insertion
+
+**Requirement:** Hands-free voice recording with text insertion at cursor.
+
+| Aspect | Requirement | Status |
+|--------|-------------|--------|
+| Voice activation | Customizable global hotkey (Cmd+L default) | ✅ Complete |
+| State machine | IDLE → LISTENING → FINALIZING → CORRECTING → INSERTING → DONE | ✅ Complete |
+| Stop word detection | Configurable word to auto-end recording | ✅ Complete |
+| Text insertion | Insert at active cursor via AppleScript | ✅ Complete |
+| Clipboard preservation | Restore clipboard after insertion | ✅ Complete |
+| Auto-enter mode | Optional Enter key press after insertion | ✅ Complete |
+| Endpoint detection | Configurable silence threshold (default 1500ms) | ✅ Complete |
+
+**Acceptance Criteria:**
+- Voice recording starts/stops reliably on hotkey and stop word
+- Text inserts at correct cursor position in any app
+- Clipboard not corrupted
+- State machine handles all edge cases (interruption, errors)
+- Endpoint detection respects user configuration
+
+---
+
+### FR-7: LLM Transcript Correction
+
+**Requirement:** Real-time correction of transcripts using OpenAI-compatible API.
+
+| Aspect | Requirement | Status |
+|--------|-------------|--------|
+| LLM integration | OpenAI-compatible API (custom base URL) | ✅ Complete |
+| Correction types | Grammar, punctuation, formatting, capitalization | ✅ Complete |
+| Language support | Auto or specific target language | ✅ Complete |
+| Customization | API key, base URL, model, language configurable | ✅ Complete |
+| Optional feature | Disabled by default, enable in settings | ✅ Complete |
+| Error handling | Graceful fallback if LLM unavailable | ✅ Complete |
+
+**Acceptance Criteria:**
+- LLM API called only when enabled
+- Corrected text maintains meaning
+- Errors don't block transcript display
+- Settings saved securely
+- Supports OpenAI, Ollama, and compatible providers
+
+---
+
+### FR-8: Global Hotkey Management
+
+**Requirement:** Register and manage customizable global hotkey for voice input.
+
+| Aspect | Requirement | Status |
+|--------|-------------|--------|
+| Dynamic registration | Register hotkey from settings on startup/change | ✅ Complete |
+| Hotkey format | Tauri format (e.g., "CmdOrCtrl+L") | ✅ Complete |
+| Rollback support | Restore previous hotkey if registration fails | ✅ Complete |
+| Error handling | Clear error messages if registration fails | ✅ Complete |
+
+**Acceptance Criteria:**
+- Hotkey changes apply immediately on save
+- Failed registration doesn't crash app
+- User sees error if hotkey already in use
+- Defaults to sensible value if invalid setting
 
 ---
 
@@ -393,36 +477,42 @@ Personal Translator is a lightweight, privacy-focused desktop application for re
 
 ## Release Plan
 
-### Version 0.1.0 (Current — MVP)
+### Version 0.1.0 (Stable — MVP)
 
-**Status:** Complete (2026-03-14)
+**Status:** Released (2026-03-14)
 **Features:**
 - System + microphone audio capture
 - Real-time translation to 70+ languages
-- Minimal overlay UI
+- Minimal overlay UI with subtitle mode
 - Settings persistence
-- Session history
+- Session history with export
 - Keyboard shortcuts
+- AI Assistant (Claude integration)
 
-**Known Issues:**
-- No offline mode
-- Limited error messages
-- No auto-update
-- No test suite yet
+### Version 0.2.0 (In Development — v0.2.0)
 
-### Version 0.2.0 (Backlog — Stability)
-
+**Status:** Feature Development (2026-03-30)
 **Target:** Q2 2026
 **Goals:**
+- Voice input with hands-free recording
+- LLM transcript correction (OpenAI-compatible)
+- Global hotkey customization
+- Improved error messages
+- Enhanced settings UI for new features
+
+**Completed:**
+- Voice state machine (IDLE → LISTENING → FINALIZING → CORRECTING → INSERTING → DONE)
+- Stop word detection for auto-stop
+- Text insertion at cursor via AppleScript
+- LLM correction with OpenAI-compatible APIs
+- Global hotkey registration with rollback
+- 9 new settings fields
+
+**Planned (Post-2.0):**
 - Comprehensive test coverage (>70%)
-- Enhanced error messages
 - Input validation hardening
 - Performance profiling & optimization
-- User feedback survey
-
-**Planned Features:**
 - Dark/light theme toggle
-- Keyboard shortcut customization
 - Auto-update mechanism
 - Crash reporting (optional, opt-in)
 
@@ -431,11 +521,11 @@ Personal Translator is a lightweight, privacy-focused desktop application for re
 **Target:** H2 2026+
 **Goals:**
 - App Store distribution
-- Cloud sync (optional)
-- TTS output
-- Multi-window support
-- Custom hotkey configuration
-- SRT/VTT export
+- Cloud sync of settings/transcripts (optional)
+- Text-to-speech output (read translations aloud)
+- Multi-window support (watch on secondary monitor)
+- SRT/VTT export for subtitle files
+- Translation quality analytics
 
 ---
 
@@ -529,5 +619,6 @@ Personal Translator is a lightweight, privacy-focused desktop application for re
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.0 | 2026-03-30 | Added v0.2.0 features: voice input, LLM correction, global hotkey management, 9 new settings fields |
 | 1.0 | 2026-03-14 | Initial PDR after React 19 migration |
 

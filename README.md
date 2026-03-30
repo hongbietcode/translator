@@ -46,6 +46,19 @@ Real-time speech translation app for macOS. Captures system audio or microphone 
 - Analyze statements and get suggested responses
 - Supports Claude Haiku, Sonnet, and Opus models
 
+### Voice Input & Text Insertion
+- **Hands-free recording** — Customizable global hotkey (Cmd+L default) to record voice
+- **Stop word detection** — Auto-end recording on configurable stop word
+- **Text insertion** — Inserts transcribed text at cursor in any app via AppleScript
+- **Auto-enter mode** — Optional auto-press Enter after insertion
+- **Endpoint detection** — Configurable silence threshold for recording end
+
+### LLM Transcript Correction
+- **Grammar & punctuation fixes** — Real-time correction using OpenAI-compatible LLM
+- **Customizable LLM** — Supports OpenAI, Ollama, or any OpenAI-compatible API
+- **Language-aware output** — Specify target language or auto-detect
+- **Optional feature** — Enable in Settings for text correction workflows
+
 ### Tray Menu
 - Start/Stop live translation from the menu bar
 - Switch source/target languages
@@ -57,15 +70,15 @@ Real-time speech translation app for macOS. Captures system audio or microphone 
 ### Other
 - Custom context (domain + terms) for improved transcription accuracy
 - Translation history with session tracking and export
-- Voice input mode (Cmd+L)
 - Settings window with full configuration
+- Global hotkey customization with rollback
 
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
 | `Cmd+Return` | Start/Stop translation |
-| `Cmd+L` | Voice input |
+| `Cmd+L` | Voice input (customizable) |
 | `Cmd+,` | Open Settings |
 | `Cmd+H` | View History |
 
@@ -113,11 +126,18 @@ npm run tauri dev
 
 On first launch, open Settings (`Cmd+,` or tray menu) and configure:
 
+### Required
 1. **Soniox API Key** — See [Getting a Soniox API Key](#getting-a-soniox-api-key) below
+
+### Recommended
 2. **Source/Target Languages** — Select your preferred languages
 3. **Audio Source** — Choose System, Microphone, or Both
-4. **(Optional) Anthropic API Key** — For AI Assistant features
-5. **(Optional) Custom Context** — Domain and terms for better accuracy
+
+### Optional Features
+4. **AI Assistant** — Enter Anthropic API key to enable Claude integration
+5. **Voice Input** — Set custom hotkey, stop word, auto-enter, endpoint delay
+6. **LLM Correction** — Configure OpenAI-compatible API for transcript correction
+7. **Custom Context** — Domain and terms for improved transcription accuracy
 
 ## Getting a Soniox API Key
 

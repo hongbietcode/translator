@@ -63,7 +63,10 @@ pub fn run() {
                 })
                 .build(app)?;
 
-            let shortcut: Shortcut = "CmdOrCtrl+L".parse().unwrap();
+            let shortcut_str = &current_settings.voice_input_shortcut;
+            let shortcut: Shortcut = shortcut_str
+                .parse()
+                .unwrap_or_else(|_| "CmdOrCtrl+L".parse().unwrap());
             app.global_shortcut().on_shortcut(shortcut, |app, _shortcut, event| {
                 if event.state == ShortcutState::Pressed {
                     let _ = tray::open_voice_input_window(app);
@@ -87,6 +90,10 @@ pub fn run() {
             commands::translate::translate_text,
             commands::ai_chat::ai_chat,
             commands::ai_chat::ai_sync_transcript,
+            commands::text_inserter::insert_text_at_cursor,
+            commands::text_inserter::check_accessibility_permission,
+            commands::llm_correction::correct_transcript,
+            commands::global_shortcut::update_voice_input_shortcut,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

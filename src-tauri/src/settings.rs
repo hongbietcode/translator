@@ -61,6 +61,33 @@ pub struct Settings {
     /// AI model to use
     #[serde(default = "default_ai_model")]
     pub ai_model: String,
+    /// Global shortcut for voice input
+    #[serde(default = "default_voice_input_shortcut")]
+    pub voice_input_shortcut: String,
+    /// Stop word to end voice recording (empty = disabled)
+    #[serde(default)]
+    pub voice_stop_word: String,
+    /// Auto-press Enter after text insertion
+    #[serde(default)]
+    pub voice_enter_mode: bool,
+    /// Endpoint detection delay in milliseconds
+    #[serde(default = "default_voice_endpoint_delay_ms")]
+    pub voice_endpoint_delay_ms: u32,
+    /// Enable LLM-based transcript correction
+    #[serde(default)]
+    pub llm_correction_enabled: bool,
+    /// LLM correction API key
+    #[serde(default)]
+    pub llm_correction_api_key: String,
+    /// LLM correction API base URL (OpenAI-compatible)
+    #[serde(default = "default_llm_correction_base_url")]
+    pub llm_correction_base_url: String,
+    /// LLM correction model name
+    #[serde(default = "default_llm_correction_model")]
+    pub llm_correction_model: String,
+    /// LLM correction output language
+    #[serde(default = "default_llm_correction_language")]
+    pub llm_correction_language: String,
 }
 
 fn default_bg_color() -> String { "#1a1a2e".to_string() }
@@ -72,6 +99,26 @@ fn default_subtitle_text_color() -> String { "#ffffff".to_string() }
 
 fn default_ai_model() -> String {
     "claude-haiku-4-5-20251001".to_string()
+}
+
+fn default_voice_input_shortcut() -> String {
+    "CmdOrCtrl+L".to_string()
+}
+
+fn default_voice_endpoint_delay_ms() -> u32 {
+    1500
+}
+
+fn default_llm_correction_base_url() -> String {
+    "https://api.openai.com/v1".to_string()
+}
+
+fn default_llm_correction_model() -> String {
+    "gpt-4o-mini".to_string()
+}
+
+fn default_llm_correction_language() -> String {
+    "auto".to_string()
 }
 
 impl Default for Settings {
@@ -96,6 +143,15 @@ impl Default for Settings {
             anthropic_api_key: String::new(),
             ai_enabled: false,
             ai_model: default_ai_model(),
+            voice_input_shortcut: default_voice_input_shortcut(),
+            voice_stop_word: String::new(),
+            voice_enter_mode: false,
+            voice_endpoint_delay_ms: default_voice_endpoint_delay_ms(),
+            llm_correction_enabled: false,
+            llm_correction_api_key: String::new(),
+            llm_correction_base_url: default_llm_correction_base_url(),
+            llm_correction_model: default_llm_correction_model(),
+            llm_correction_language: default_llm_correction_language(),
         }
     }
 }

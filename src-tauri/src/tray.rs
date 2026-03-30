@@ -116,12 +116,17 @@ pub fn build_tray_menu(handle: &AppHandle, s: &Settings) -> tauri::Result<Menu<W
         None::<&str>,
     )?;
 
+    let shortcut_label = if s.voice_input_shortcut.is_empty() {
+        "CmdOrCtrl+L".to_string()
+    } else {
+        s.voice_input_shortcut.clone()
+    };
     let voice_input = MenuItem::with_id(
         handle,
         "voice-input",
         "Voice Input",
         true,
-        Some("CmdOrCtrl+L"),
+        Some(shortcut_label.as_str()),
     )?;
 
     let subtitle_toggle = CheckMenuItem::with_id(

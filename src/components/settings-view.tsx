@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Settings } from "@/types/settings";
+import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 const LANGUAGES = [
@@ -45,6 +46,17 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [showAnthropicKey, setShowAnthropicKey] = useState(false);
   const [aiEnabled, setAiEnabled] = useState(false);
   const [aiModel, setAiModel] = useState("claude-haiku-4-5-20251001");
+  const [voiceShortcut, setVoiceShortcut] = useState("CmdOrCtrl+L");
+  const [voiceStopWord, setVoiceStopWord] = useState("");
+  const [voiceEnterMode, setVoiceEnterMode] = useState(false);
+  const [voiceEndpointDelay, setVoiceEndpointDelay] = useState(1500);
+  const [llmEnabled, setLlmEnabled] = useState(false);
+  const [llmApiKey, setLlmApiKey] = useState("");
+  const [showLlmKey, setShowLlmKey] = useState(false);
+  const [llmBaseUrl, setLlmBaseUrl] = useState("https://api.openai.com/v1");
+  const [llmModel, setLlmModel] = useState("gpt-4o-mini");
+  const [llmLanguage, setLlmLanguage] = useState("auto");
+  const [recordingShortcut, setRecordingShortcut] = useState(false);
 
   useEffect(() => {
     setApiKey(settings.soniox_api_key || "");
@@ -65,6 +77,15 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
     setAnthropicKey(settings.anthropic_api_key || "");
     setAiEnabled(settings.ai_enabled || false);
     setAiModel(settings.ai_model || "claude-haiku-4-5-20251001");
+    setVoiceShortcut(settings.voice_input_shortcut || "CmdOrCtrl+L");
+    setVoiceStopWord(settings.voice_stop_word || "");
+    setVoiceEnterMode(settings.voice_enter_mode || false);
+    setVoiceEndpointDelay(settings.voice_endpoint_delay_ms || 1500);
+    setLlmEnabled(settings.llm_correction_enabled || false);
+    setLlmApiKey(settings.llm_correction_api_key || "");
+    setLlmBaseUrl(settings.llm_correction_base_url || "https://api.openai.com/v1");
+    setLlmModel(settings.llm_correction_model || "gpt-4o-mini");
+    setLlmLanguage(settings.llm_correction_language || "auto");
   }, [settings]);
 
   const handleSave = async () => {
@@ -86,6 +107,15 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
       anthropic_api_key: anthropicKey.trim(),
       ai_enabled: aiEnabled,
       ai_model: aiModel,
+      voice_input_shortcut: voiceShortcut,
+      voice_stop_word: voiceStopWord,
+      voice_enter_mode: voiceEnterMode,
+      voice_endpoint_delay_ms: voiceEndpointDelay,
+      llm_correction_enabled: llmEnabled,
+      llm_correction_api_key: llmApiKey.trim(),
+      llm_correction_base_url: llmBaseUrl.trim(),
+      llm_correction_model: llmModel.trim(),
+      llm_correction_language: llmLanguage,
     };
 
     const domain = contextDomain.trim();
@@ -99,11 +129,45 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
 
     try {
       await onSave(newSettings);
+      if (newSettings.voice_input_shortcut !== settings.voice_input_shortcut) {
+        try {
+          await invoke("update_voice_input_shortcut", {
+            newShortcut: newSettings.voice_input_shortcut,
+          });
+        } catch (err) {
+          onToast(`Shortcut update failed: ${err}`, "error");
+          return;
+        }
+      }
       onToast("Settings saved", "success");
     } catch (err) {
       onToast(`Failed to save: ${err}`, "error");
     }
   };
+
+  const handleShortcutKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!recordingShortcut) return;
+    e.preventDefault();
+    if (e.key === "Escape") {
+      setRecordingShortcut(false);
+      return;
+    }
+    if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;
+
+    const parts: string[] = [];
+    if (e.metaKey) parts.push("CmdOrCtrl");
+    else if (e.ctrlKey) parts.push("CmdOrCtrl");
+    if (e.altKey) parts.push("Alt");
+    if (e.shiftKey) parts.push("Shift");
+
+    const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+    parts.push(key);
+
+    if (parts.length >= 2) {
+      setVoiceShortcut(parts.join("+"));
+      setRecordingShortcut(false);
+    }
+  }, [recordingShortcut]);
 
   return (
     <div className="view-shell">
@@ -391,6 +455,138 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
               <option value="claude-opus-4-6">Claude Opus 4.6 (Best)</option>
             </select>
           </div>
+        </div>
+
+        <div className="s-card">
+          <div className="s-card-header">
+            <MicIcon />
+            <span>Voice Input</span>
+          </div>
+          <div className="s-field">
+            <span className="s-field-label">Global Shortcut</span>
+            <div className="s-key-row">
+              <input
+                type="text"
+                value={recordingShortcut ? "Press keys..." : voiceShortcut}
+                readOnly
+                className="input-field"
+                onKeyDown={handleShortcutKeyDown}
+                onFocus={() => recordingShortcut && undefined}
+              />
+              <button
+                onClick={() => setRecordingShortcut(!recordingShortcut)}
+                className={`s-icon-btn ${recordingShortcut ? "s-icon-btn--active" : ""}`}
+                title={recordingShortcut ? "Cancel" : "Record shortcut"}
+              >
+                {recordingShortcut ? "Esc" : "Rec"}
+              </button>
+            </div>
+          </div>
+          <div className="s-field" style={{ marginTop: 8 }}>
+            <span className="s-field-label">Stop Word</span>
+            <input
+              type="text"
+              value={voiceStopWord}
+              onChange={(e) => setVoiceStopWord(e.target.value)}
+              placeholder="e.g., thank you"
+              className="input-field"
+            />
+            <p className="s-hint">Say this phrase to end recording (empty = disabled)</p>
+          </div>
+          <label className="s-toggle-row" style={{ marginTop: 8 }}>
+            <span>Enter Mode (press Enter after insertion)</span>
+            <div className={`s-switch ${voiceEnterMode ? "s-switch--on" : ""}`} onClick={() => setVoiceEnterMode(!voiceEnterMode)}>
+              <div className="s-switch-thumb" />
+            </div>
+          </label>
+          <div className="s-field" style={{ marginTop: 8 }}>
+            <span className="s-field-label">Endpoint Delay: {voiceEndpointDelay}ms</span>
+            <input
+              type="range"
+              min={500}
+              max={3000}
+              step={100}
+              value={voiceEndpointDelay}
+              onChange={(e) => setVoiceEndpointDelay(Number(e.target.value))}
+              className="s-range"
+            />
+            <p className="s-hint">Silence detection delay before finalizing</p>
+          </div>
+        </div>
+
+        <div className="s-card">
+          <div className="s-card-header">
+            <SparkleIcon />
+            <span>LLM Correction</span>
+            <span className="s-badge">Optional</span>
+          </div>
+          <label className="s-toggle-row">
+            <span>Enable LLM transcript correction</span>
+            <div className={`s-switch ${llmEnabled ? "s-switch--on" : ""}`} onClick={() => setLlmEnabled(!llmEnabled)}>
+              <div className="s-switch-thumb" />
+            </div>
+          </label>
+          {llmEnabled && (
+            <>
+              <div className="s-field" style={{ marginTop: 8 }}>
+                <span className="s-field-label">API Key</span>
+                <div className="s-key-row">
+                  <input
+                    type={showLlmKey ? "text" : "password"}
+                    value={llmApiKey}
+                    onChange={(e) => setLlmApiKey(e.target.value)}
+                    placeholder="Enter your API key..."
+                    className="input-field"
+                    autoComplete="off"
+                  />
+                  <button onClick={() => setShowLlmKey(!showLlmKey)} className="s-icon-btn" title="Show/Hide">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      {showLlmKey ? (
+                        <>
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </>
+                      ) : (
+                        <>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </>
+                      )}
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div className="s-field" style={{ marginTop: 8 }}>
+                <span className="s-field-label">Base URL</span>
+                <input
+                  type="text"
+                  value={llmBaseUrl}
+                  onChange={(e) => setLlmBaseUrl(e.target.value)}
+                  placeholder="https://api.openai.com/v1"
+                  className="input-field"
+                />
+              </div>
+              <div className="s-field" style={{ marginTop: 8 }}>
+                <span className="s-field-label">Model</span>
+                <input
+                  type="text"
+                  value={llmModel}
+                  onChange={(e) => setLlmModel(e.target.value)}
+                  placeholder="gpt-4o-mini"
+                  className="input-field"
+                />
+              </div>
+              <div className="s-field" style={{ marginTop: 8 }}>
+                <span className="s-field-label">Output Language</span>
+                <select value={llmLanguage} onChange={(e) => setLlmLanguage(e.target.value)} className="select-field">
+                  <option value="auto">Auto (preserve original)</option>
+                  <option value="en">English</option>
+                  <option value="vi">Vietnamese</option>
+                </select>
+              </div>
+            </>
+          )}
         </div>
 
         <button onClick={handleSave} className="btn-save">
