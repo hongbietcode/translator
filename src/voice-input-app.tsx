@@ -127,6 +127,7 @@ export function VoiceInputApp() {
           text,
           pressEnter: settings.voice_enter_mode,
         });
+        await navigator.clipboard.writeText(text).catch(() => {});
         sm.insertionDone(text);
         setTimeout(() => closeWindow(), 800);
       } catch (err) {
