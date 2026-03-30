@@ -7,7 +7,12 @@
         "dev": "vite",
         "build": "tsc -b && vite build",
         "preview": "vite preview",
-        "tauri": "tauri"
+        "tauri": "tauri",
+        "setup": "bash scripts/dev-setup.sh",
+        "build:app": "tauri build",
+        "build:dmg": "tauri build --bundles dmg",
+        "sign": "bash scripts/sign-macos-app.sh",
+        "release": "bash scripts/release.sh"
     },
     "dependencies": {
         "@tauri-apps/api": "^2",
