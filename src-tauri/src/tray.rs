@@ -220,6 +220,8 @@ pub fn open_settings_window(handle: &AppHandle) -> tauri::Result<()> {
 }
 
 pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
+    crate::commands::text_inserter::save_previous_app();
+
     if let Some(win) = handle.get_webview_window("voice-input") {
         let _ = win.show();
         return Ok(());

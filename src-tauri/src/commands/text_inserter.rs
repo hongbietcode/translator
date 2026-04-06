@@ -1,6 +1,23 @@
 use std::process::Command;
+use std::sync::Mutex;
 use std::time::Duration;
 use tokio::time::sleep;
+
+static PREVIOUS_APP: Mutex<String> = Mutex::new(String::new());
+
+pub fn save_previous_app() {
+    if let Ok(name) = get_frontmost_app_name() {
+        if let Ok(mut prev) = PREVIOUS_APP.lock() {
+            *prev = name;
+        }
+    }
+}
+
+fn get_frontmost_app_name() -> Result<String, String> {
+    run_osascript(
+        r#"tell application "System Events" to get name of first application process whose frontmost is true"#,
+    )
+}
 
 fn run_osascript(script: &str) -> Result<String, String> {
     let output = Command::new("osascript")
@@ -58,6 +75,13 @@ fn restore_clipboard(original: &str) -> Result<(), String> {
 /// Insert text at cursor position in focused app via clipboard + Cmd+V
 #[tauri::command]
 pub async fn insert_text_at_cursor(text: String, press_enter: bool) -> Result<(), String> {
+    let prev_app = PREVIOUS_APP.lock().unwrap_or_else(|e| e.into_inner()).clone();
+    if !prev_app.is_empty() {
+        let script = format!(r#"tell application "{}" to activate"#, prev_app);
+        run_osascript(&script).ok();
+        sleep(Duration::from_millis(200)).await;
+    }
+
     let original_clipboard = save_clipboard().unwrap_or_default();
 
     set_clipboard(&text)?;
