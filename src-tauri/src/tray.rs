@@ -269,6 +269,12 @@ pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
             let non_activating: usize = 1 << 7;
             let _: () = msg_send![ns_win, setStyleMask: style_mask | non_activating];
             let _: () = msg_send![ns_win, setHidesOnDeactivate: false];
+            let floating_level: isize = 3;
+            let _: () = msg_send![ns_win, setLevel: floating_level];
+            let behavior: usize = msg_send![ns_win, collectionBehavior];
+            let can_join_all_spaces: usize = 1 << 0;
+            let stationary: usize = 1 << 4;
+            let _: () = msg_send![ns_win, setCollectionBehavior: behavior | can_join_all_spaces | stationary];
             let cls = objc2::runtime::AnyClass::get(
                 std::ffi::CStr::from_bytes_with_nul(b"NSColor\0").unwrap(),
             )

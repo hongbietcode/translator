@@ -118,6 +118,8 @@ export function VoiceInputApp() {
   const doInsert = useCallback(
     async (text: string) => {
       sm.startInserting(text);
+      await getCurrentWindow().hide();
+      await new Promise((r) => setTimeout(r, 150));
       try {
         await invoke("insert_text_at_cursor", {
           text,
@@ -125,18 +127,18 @@ export function VoiceInputApp() {
         });
         await navigator.clipboard.writeText(text).catch(() => {});
         sm.insertionDone(text);
-        setTimeout(() => closeWindow(), 800);
+        setTimeout(() => getCurrentWindow().destroy(), 300);
       } catch (err) {
         try {
           await navigator.clipboard.writeText(text);
           sm.insertionDone(text);
-          setTimeout(() => closeWindow(), 800);
+          setTimeout(() => getCurrentWindow().destroy(), 300);
         } catch {
           sm.setError(`Insert failed: ${err}`, false);
         }
       }
     },
-    [settings.voice_enter_mode, sm, closeWindow],
+    [settings.voice_enter_mode, sm],
   );
 
   useEffect(() => {
