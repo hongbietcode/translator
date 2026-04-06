@@ -30,7 +30,7 @@ get_version() {
 
 build_release() {
   info "Building release..."
-  npm run build:app 2>&1
+  npx tauri build --bundles app 2>&1
 
   local bundle="src-tauri/target/release/bundle/macos/${APP_NAME}.app"
   [[ -d "$bundle" ]] || fatal "Build failed: ${bundle} not found"
