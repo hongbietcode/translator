@@ -30,7 +30,7 @@ get_version() {
 
 build_release() {
   info "Building release..."
-  npm run build -- -- --bundles app
+  npm run build:app 2>&1
 
   local bundle="src-tauri/target/release/bundle/macos/${APP_NAME}.app"
   [[ -d "$bundle" ]] || fatal "Build failed: ${bundle} not found"
@@ -39,31 +39,24 @@ build_release() {
   bash scripts/sign-macos-app.sh
 
   ok "Build complete"
-  echo "$bundle"
 }
 
 package_release() {
-  local bundle="$1"
-  local version="$2"
+  local bundle="src-tauri/target/release/bundle/macos/${APP_NAME}.app"
   local arch
   arch="$(uname -m | sed 's/arm64/aarch64/')"
-  local tar_name="${APP_NAME}_${arch}.app.tar.gz"
-  local zip_name="${APP_NAME}_${arch}.zip"
+  TAR_NAME="${APP_NAME}_${arch}.app.tar.gz"
+  ZIP_NAME="${APP_NAME}_${arch}.zip"
 
   info "Packaging..."
-  tar -czf "$tar_name" -C "$(dirname "$bundle")" "$(basename "$bundle")"
-  ditto -c -k --sequesterRsrc "$bundle" "$zip_name"
+  tar -czf "$TAR_NAME" -C "$(dirname "$bundle")" "$(basename "$bundle")"
+  ditto -c -k --sequesterRsrc "$bundle" "$ZIP_NAME"
 
-  ok "Packaged: ${tar_name}, ${zip_name}"
-  echo "${tar_name}|${zip_name}"
+  ok "Packaged: ${TAR_NAME}, ${ZIP_NAME}"
 }
 
 create_release() {
   local version="$1"
-  local packages="$2"
-  local tar_name zip_name
-  tar_name="$(echo "$packages" | cut -d'|' -f1)"
-  zip_name="$(echo "$packages" | cut -d'|' -f2)"
   local tag="v${version}"
 
   if git rev-parse "$tag" >/dev/null 2>&1; then
@@ -80,7 +73,7 @@ create_release() {
   gh release create "$tag" \
     --title "${APP_NAME} ${tag}" \
     --notes "Release ${tag}" \
-    "$tar_name" "$zip_name"
+    "$TAR_NAME" "$ZIP_NAME"
 
   ok "Release published: ${tag}"
 }
@@ -97,13 +90,9 @@ main() {
   version="$(get_version)"
   info "Version: ${version}"
 
-  local bundle
-  bundle="$(build_release)"
-
-  local packages
-  packages="$(package_release "$bundle" "$version")"
-
-  create_release "$version" "$packages"
+  build_release
+  package_release
+  create_release "$version"
 
   echo ""
   ok "Release complete!"

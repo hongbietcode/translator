@@ -16,7 +16,7 @@ export function VoiceInputApp() {
   const sm = useVoiceInputStateMachine();
   const accumulatedRef = useRef("");
   const startedRef = useRef(false);
-  const handleEndRef = useRef<(text?: string) => Promise<void>>();
+  const handleEndRef = useRef<(text?: string) => Promise<void>>(undefined);
 
   useEffect(() => {
     soniox.onTranslationRef.current = null;
@@ -28,10 +28,6 @@ export function VoiceInputApp() {
   useEffect(() => {
     const text = soniox.segments.map((s) => s.original).join(" ");
     if (text) accumulatedRef.current = text;
-    const display = (
-      accumulatedRef.current +
-      (soniox.provisionalText ? " " + soniox.provisionalText : "")
-    ).trim();
     sm.updateTranscript(accumulatedRef.current, soniox.provisionalText);
 
     if (settings.voice_stop_word && text) {

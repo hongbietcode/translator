@@ -159,8 +159,6 @@ export function TranscriptDisplay({
                   {block.segments.map((seg, si) => {
                     if (!seg.translation) return null;
                     const isSettled = settledIds.has(seg.createdAt);
-                    const globalIdx = seg._index;
-
                     return (
                       <span key={si}>
                         {showOriginal && seg.original && (
