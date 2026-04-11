@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TranscriptSegment } from "@/hooks/use-soniox";
 
-const SPEAKER_COLORS = ["#14b8a6", "#6366f1", "#ec4899", "#f59e0b", "#8b5cf6", "#ef4444"];
+const SPEAKER_COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#ef4444"];
 function speakerColor(id: number) { return SPEAKER_COLORS[(id - 1) % SPEAKER_COLORS.length]; }
 
 interface SpeakerBlock {

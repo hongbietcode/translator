@@ -187,8 +187,8 @@ pub fn open_caption_window(handle: &AppHandle) -> tauri::Result<()> {
 
     let _win = WebviewWindowBuilder::new(handle, "caption", WebviewUrl::App("caption.html".into()))
         .title("Translator")
-        .inner_size(900.0, 300.0)
-        .min_inner_size(500.0, 300.0)
+        .inner_size(640.0, 220.0)
+        .min_inner_size(400.0, 160.0)
         .decorations(false)
         .always_on_top(true)
         .resizable(true)

@@ -1466,7 +1466,7 @@
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(20, 184, 166, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   border-radius: 24px;
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.08),
@@ -1490,7 +1490,7 @@
 
 .vi-shell[data-state="listening"]::before {
   opacity: 1;
-  box-shadow: 0 0 32px rgba(20, 184, 166, 0.1);
+  box-shadow: 0 0 32px rgba(59, 130, 246, 0.1);
 }
 
 .vi-shell[data-state="correcting"]::before,
@@ -1520,20 +1520,20 @@
 }
 
 .vi-shell[data-state="listening"] .vi-status-dot {
-  background: #14b8a6;
-  box-shadow: 0 0 8px #14b8a6, 0 0 16px rgba(20, 184, 166, 0.4);
+  background: #3b82f6;
+  box-shadow: 0 0 8px #3b82f6, 0 0 16px rgba(59, 130, 246, 0.4);
   animation: vi-breathe 2.4s ease-in-out infinite;
 }
 
 .vi-shell[data-state="correcting"] .vi-status-dot,
 .vi-shell[data-state="finalizing"] .vi-status-dot {
-  background: #6366f1;
-  box-shadow: 0 0 8px #6366f1;
+  background: #8b5cf6;
+  box-shadow: 0 0 8px #8b5cf6;
   animation: vi-pulse 0.8s ease-in-out infinite;
 }
 
 .vi-shell[data-state="inserting"] .vi-status-dot {
-  background: #14b8a6;
+  background: #3b82f6;
   animation: vi-pulse 0.6s ease-in-out infinite;
 }
 
@@ -1555,8 +1555,8 @@
 }
 
 @keyframes vi-breathe {
-  0%, 100% { box-shadow: 0 0 6px #14b8a6, 0 0 12px rgba(20, 184, 166, 0.3); }
-  50% { box-shadow: 0 0 10px #14b8a6, 0 0 20px rgba(20, 184, 166, 0.5); }
+  0%, 100% { box-shadow: 0 0 6px #3b82f6, 0 0 12px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 10px #3b82f6, 0 0 20px rgba(59, 130, 246, 0.5); }
 }
 
 /* Transcript area */
@@ -1597,7 +1597,7 @@
 }
 
 .vi-shell[data-state="done"] .vi-transcript-final {
-  color: #0f766e;
+  color: #15803d;
 }
 
 .vi-shell[data-state="error"] .vi-transcript-final {
@@ -1621,10 +1621,10 @@
   transition: color 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.vi-shell[data-state="listening"] .vi-state-label { color: #14b8a6; }
+.vi-shell[data-state="listening"] .vi-state-label { color: #3b82f6; }
 .vi-shell[data-state="correcting"] .vi-state-label,
-.vi-shell[data-state="finalizing"] .vi-state-label { color: #6366f1; }
-.vi-shell[data-state="inserting"] .vi-state-label { color: #14b8a6; }
+.vi-shell[data-state="finalizing"] .vi-state-label { color: #8b5cf6; }
+.vi-shell[data-state="inserting"] .vi-state-label { color: #3b82f6; }
 .vi-shell[data-state="done"] .vi-state-label { color: #10b981; }
 .vi-shell[data-state="error"] .vi-state-label { color: #ef4444; }
 
@@ -1632,7 +1632,7 @@
 .vi-sep {
   width: 1px;
   height: 20px;
-  background: rgba(20, 184, 166, 0.15);
+  background: rgba(59, 130, 246, 0.15);
   flex-shrink: 0;
 }
 
@@ -1681,7 +1681,7 @@
 .vi-spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(20, 184, 166, 0.15);
+  border: 2px solid rgba(59, 130, 246, 0.15);
   border-top-color: #6366f1;
   border-radius: 50%;
   animation: vi-spin 0.6s linear infinite;
