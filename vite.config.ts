@@ -31,6 +31,7 @@ export default defineConfig({
         settings: path.resolve(__dirname, "settings.html"),
         "voice-input": path.resolve(__dirname, "voice-input.html"),
         subtitle: path.resolve(__dirname, "subtitle.html"),
+        onboarding: path.resolve(__dirname, "onboarding.html"),
       },
     },
   },

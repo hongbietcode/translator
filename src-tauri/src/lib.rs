@@ -6,6 +6,7 @@ pub mod tray;
 use audio::microphone::MicCapture;
 use audio::system_audio::SystemAudioCapture;
 use commands::audio::AudioState;
+use commands::permissions;
 use settings::{Settings, SettingsState};
 use std::sync::Mutex;
 use tauri::{
@@ -61,6 +62,11 @@ pub fn run() {
                 })
                 .build(app)?;
 
+            let perms = permissions::check_all_permissions();
+            if !perms.all_granted {
+                let _ = tray::open_onboarding_window(app.handle());
+            }
+
             let shortcut_str = &current_settings.voice_input_shortcut;
             let shortcut: Shortcut = shortcut_str
                 .parse()
@@ -94,6 +100,9 @@ pub fn run() {
             commands::text_inserter::check_accessibility_permission,
             commands::llm_correction::correct_transcript,
             commands::global_shortcut::update_voice_input_shortcut,
+            commands::permissions::check_all_permissions,
+            commands::permissions::request_screen_recording,
+            commands::permissions::open_permission_settings,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

@@ -291,6 +291,29 @@ pub fn open_voice_input_window(handle: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+pub fn open_onboarding_window(handle: &AppHandle) -> tauri::Result<()> {
+    if let Some(win) = handle.get_webview_window("onboarding") {
+        let _ = win.show();
+        let _ = win.set_focus();
+        return Ok(());
+    }
+
+    let _win = WebviewWindowBuilder::new(
+        handle,
+        "onboarding",
+        WebviewUrl::App("onboarding.html".into()),
+    )
+    .title("Translator — Setup")
+    .inner_size(520.0, 560.0)
+    .min_inner_size(420.0, 400.0)
+    .decorations(true)
+    .resizable(false)
+    .center()
+    .build()?;
+
+    Ok(())
+}
+
 pub fn open_subtitle_window(handle: &AppHandle) -> tauri::Result<()> {
     if let Some(win) = handle.get_webview_window("subtitle") {
         let _ = win.show();
