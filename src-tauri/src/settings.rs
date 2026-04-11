@@ -84,12 +84,12 @@ pub struct Settings {
     pub llm_correction_language: String,
 }
 
-fn default_bg_color() -> String { "#1a1a2e".to_string() }
-fn default_text_color() -> String { "#ffffff".to_string() }
+fn default_bg_color() -> String { "#ffffff".to_string() }
+fn default_text_color() -> String { "#0f172a".to_string() }
 fn default_true() -> bool { true }
 fn default_subtitle_font_size() -> u32 { 28 }
-fn default_subtitle_bg_color() -> String { "rgba(0,0,0,0.75)".to_string() }
-fn default_subtitle_text_color() -> String { "#ffffff".to_string() }
+fn default_subtitle_bg_color() -> String { "rgba(255,255,255,0.85)".to_string() }
+fn default_subtitle_text_color() -> String { "#0f172a".to_string() }
 
 fn default_voice_input_shortcut() -> String {
     "CmdOrCtrl+L".to_string()

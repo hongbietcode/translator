@@ -56,6 +56,7 @@ export function Titlebar({
         <button
           onClick={onToggle}
           className={`pill-segment pill-toggle ${isRunning ? "pill-toggle--stop" : "pill-toggle--start"}`}
+          title={isRunning ? "Stop" : "Start"}
         >
           {isRunning ? (
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
@@ -66,7 +67,6 @@ export function Titlebar({
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
           )}
-          <span>{isRunning ? "Stop" : "Start"}</span>
         </button>
 
         <div className="pill-divider" />

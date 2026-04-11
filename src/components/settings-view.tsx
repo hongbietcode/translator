@@ -53,6 +53,7 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
   const [llmModel, setLlmModel] = useState("gpt-4o-mini");
   const [llmLanguage, setLlmLanguage] = useState("auto");
   const [recordingShortcut, setRecordingShortcut] = useState(false);
+  const [activeTab, setActiveTab] = useState<"general" | "languages" | "voice" | "llm">("general");
 
   useEffect(() => {
     setApiKey(settings.soniox_api_key || "");
@@ -161,388 +162,424 @@ export function SettingsView({ settings, onSave, onToast }: SettingsViewProps) {
         </button>
       </div>
 
+      <div className="tab-bar">
+        <button
+          className={`tab-item ${activeTab === "general" ? "tab-item--active" : ""}`}
+          onClick={() => setActiveTab("general")}
+        >
+          General
+        </button>
+        <button
+          className={`tab-item ${activeTab === "languages" ? "tab-item--active" : ""}`}
+          onClick={() => setActiveTab("languages")}
+        >
+          Languages
+        </button>
+        <button
+          className={`tab-item ${activeTab === "voice" ? "tab-item--active" : ""}`}
+          onClick={() => setActiveTab("voice")}
+        >
+          Voice
+        </button>
+        <button
+          className={`tab-item ${activeTab === "llm" ? "tab-item--active" : ""}`}
+          onClick={() => setActiveTab("llm")}
+        >
+          LLM
+        </button>
+      </div>
+
       <div className="s-body">
-        <div className="s-section-title">General</div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <KeyIcon />
-            <span>API Key</span>
-          </div>
-          <div className="s-key-row">
-            <input
-              type={showKey ? "text" : "password"}
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter your Soniox API key..."
-              className="input-field"
-              autoComplete="off"
-            />
-            <button onClick={() => setShowKey(!showKey)} className="s-icon-btn" title="Show/Hide">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                {showKey ? (
-                  <>
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </>
-                ) : (
-                  <>
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
-          <p className="s-hint">
-            Get your key at{" "}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                openUrl("https://console.soniox.com/signup/");
-              }}
-            >
-              console.soniox.com
-            </a>
-          </p>
-        </div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <GlobeIcon />
-            <span>Languages</span>
-          </div>
-          <div className="s-lang-grid">
-            <div className="s-field">
-              <span className="s-field-label">Source</span>
-              <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="select-field">
-                {LANGUAGES.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="s-arrow">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.35">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </div>
-            <div className="s-field">
-              <span className="s-field-label">Target</span>
-              <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="select-field">
-                {TARGET_LANGUAGES.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <MicIcon />
-            <span>Audio Source</span>
-          </div>
-          <div className="s-pill-group">
-            {[
-              { value: "system", label: "System", icon: <SpeakerIcon /> },
-              { value: "microphone", label: "Mic", icon: <MicIcon /> },
-              { value: "both", label: "Both", icon: <BothIcon /> },
-            ].map((o) => (
-              <button
-                key={o.value}
-                className={`s-pill ${audioSource === o.value ? "s-pill--active" : ""}`}
-                onClick={() => setAudioSource(o.value)}
-              >
-                {o.icon}
-                {o.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="s-section-title">Display</div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <MonitorIcon />
-            <span>Caption Display</span>
-          </div>
-          <div className="s-display-grid">
-            <div className="s-display-item">
-              <span className="s-field-label">Opacity</span>
-              <div className="s-chip-row">
-                {[50, 70, 85, 100].map((o) => (
-                  <button key={o} className={`s-chip ${opacity === o ? "s-chip--active" : ""}`} onClick={() => setOpacity(o)}>
-                    {o}%
-                  </button>
-                ))}
+        {activeTab === "general" && (
+          <>
+            <div className="s-card">
+              <div className="s-card-header">
+                <KeyIcon />
+                <span>API Key</span>
               </div>
-            </div>
-            <div className="s-display-item">
-              <span className="s-field-label">Font Size</span>
-              <div className="s-chip-row">
-                {[12, 14, 16, 18, 20].map((o) => (
-                  <button key={o} className={`s-chip ${fontSize === o ? "s-chip--active" : ""}`} onClick={() => setFontSize(o)}>
-                    {o}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <label className="s-toggle-row">
-            <span>Show original text</span>
-            <div className={`s-switch ${showOriginal ? "s-switch--on" : ""}`} onClick={() => setShowOriginal(!showOriginal)}>
-              <div className="s-switch-thumb" />
-            </div>
-          </label>
-          <div className="s-color-row">
-            <div className="s-color-field">
-              <span className="s-field-label">Background</span>
-              <div className="s-color-input">
-                <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} />
-                <input type="text" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="input-field s-color-hex" />
-              </div>
-            </div>
-            <div className="s-color-field">
-              <span className="s-field-label">Text Color</span>
-              <div className="s-color-input">
-                <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} />
-                <input type="text" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="input-field s-color-hex" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <SubtitleIcon />
-            <span>Subtitle Display</span>
-          </div>
-          <div className="s-display-grid">
-            <div className="s-display-item">
-              <span className="s-field-label">Font Size</span>
-              <div className="s-chip-row">
-                {[20, 24, 28, 32, 36].map((o) => (
-                  <button key={o} className={`s-chip ${subtitleFontSize === o ? "s-chip--active" : ""}`} onClick={() => setSubtitleFontSize(o)}>
-                    {o}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="s-color-row">
-            <div className="s-color-field">
-              <span className="s-field-label">Background</span>
-              <div className="s-color-input">
-                <input type="text" value={subtitleBgColor} onChange={(e) => setSubtitleBgColor(e.target.value)} className="input-field" />
-              </div>
-            </div>
-            <div className="s-color-field">
-              <span className="s-field-label">Text Color</span>
-              <div className="s-color-input">
-                <input type="color" value={subtitleTextColor} onChange={(e) => setSubtitleTextColor(e.target.value)} />
-                <input type="text" value={subtitleTextColor} onChange={(e) => setSubtitleTextColor(e.target.value)} className="input-field s-color-hex" />
-              </div>
-            </div>
-          </div>
-          <label className="s-toggle-row">
-            <span>Show original text</span>
-            <div className={`s-switch ${subtitleShowOriginal ? "s-switch--on" : ""}`} onClick={() => setSubtitleShowOriginal(!subtitleShowOriginal)}>
-              <div className="s-switch-thumb" />
-            </div>
-          </label>
-        </div>
-
-        <div className="s-section-title">Voice Input</div>
-
-        <div className="s-card">
-          <div className="s-card-header">
-            <DocIcon />
-            <span>Vocabulary</span>
-            {vocabTerms.length > 0 && <span className="s-badge">{vocabTerms.length}</span>}
-          </div>
-          <div className="s-tag-list">
-            {vocabTerms.map((term, i) => (
-              <span key={i} className="s-tag">
-                {term}
-                <button
-                  className="s-tag-remove"
-                  onClick={() => setVocabTerms(vocabTerms.filter((_, j) => j !== i))}
-                >
-                  &times;
+              <div className="s-key-row">
+                <input
+                  type={showKey ? "text" : "password"}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter your Soniox API key..."
+                  className="input-field"
+                  autoComplete="off"
+                />
+                <button onClick={() => setShowKey(!showKey)} className="s-icon-btn" title="Show/Hide">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    {showKey ? (
+                      <>
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </>
+                    ) : (
+                      <>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </>
+                    )}
+                  </svg>
                 </button>
-              </span>
-            ))}
-          </div>
-          <div className="s-key-row" style={{ marginTop: 8 }}>
-            <input
-              type="text"
-              value={vocabInput}
-              onChange={(e) => setVocabInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  const term = vocabInput.trim();
-                  if (term && !vocabTerms.includes(term)) {
-                    setVocabTerms([...vocabTerms, term]);
-                    setVocabInput("");
-                  }
-                }
-              }}
-              placeholder="Add term..."
-              className="input-field"
-            />
-            <button
-              className="s-icon-btn"
-              onClick={() => {
-                const term = vocabInput.trim();
-                if (term && !vocabTerms.includes(term)) {
-                  setVocabTerms([...vocabTerms, term]);
-                  setVocabInput("");
-                }
-              }}
-            >
-              Add
-            </button>
-          </div>
-          <p className="s-hint">Custom words/names to improve speech recognition accuracy</p>
-        </div>
+              </div>
+              <p className="s-hint">
+                Get your key at{" "}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openUrl("https://console.soniox.com/signup/");
+                  }}
+                >
+                  console.soniox.com
+                </a>
+              </p>
+            </div>
 
-        <div className="s-card">
-          <div className="s-card-header">
-            <MicIcon />
-            <span>Voice Input</span>
-          </div>
-          <div className="s-field">
-            <span className="s-field-label">Global Shortcut</span>
-            <div className="s-key-row">
-              <input
-                type="text"
-                value={recordingShortcut ? "Press keys..." : voiceShortcut}
-                readOnly
-                className="input-field"
-                onKeyDown={handleShortcutKeyDown}
-                onFocus={() => recordingShortcut && undefined}
-              />
-              <button
-                onClick={() => setRecordingShortcut(!recordingShortcut)}
-                className={`s-icon-btn ${recordingShortcut ? "s-icon-btn--active" : ""}`}
-                title={recordingShortcut ? "Cancel" : "Record shortcut"}
-              >
-                {recordingShortcut ? "Esc" : "Rec"}
-              </button>
+            <div className="s-card">
+              <div className="s-card-header">
+                <MicIcon />
+                <span>Audio Source</span>
+              </div>
+              <div className="s-pill-group">
+                {[
+                  { value: "system", label: "System", icon: <SpeakerIcon /> },
+                  { value: "microphone", label: "Mic", icon: <MicIcon /> },
+                  { value: "both", label: "Both", icon: <BothIcon /> },
+                ].map((o) => (
+                  <button
+                    key={o.value}
+                    className={`s-pill ${audioSource === o.value ? "s-pill--active" : ""}`}
+                    onClick={() => setAudioSource(o.value)}
+                  >
+                    {o.icon}
+                    {o.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="s-field" style={{ marginTop: 8 }}>
-            <span className="s-field-label">Stop Word</span>
-            <input
-              type="text"
-              value={voiceStopWord}
-              onChange={(e) => setVoiceStopWord(e.target.value)}
-              placeholder="e.g., thank you"
-              className="input-field"
-            />
-            <p className="s-hint">Say this phrase to end recording (empty = disabled)</p>
-          </div>
-          <label className="s-toggle-row" style={{ marginTop: 8 }}>
-            <span>Enter Mode (press Enter after insertion)</span>
-            <div className={`s-switch ${voiceEnterMode ? "s-switch--on" : ""}`} onClick={() => setVoiceEnterMode(!voiceEnterMode)}>
-              <div className="s-switch-thumb" />
-            </div>
-          </label>
-          <div className="s-field" style={{ marginTop: 8 }}>
-            <span className="s-field-label">Endpoint Delay: {voiceEndpointDelay}ms</span>
-            <input
-              type="range"
-              min={500}
-              max={3000}
-              step={100}
-              value={voiceEndpointDelay}
-              onChange={(e) => setVoiceEndpointDelay(Number(e.target.value))}
-              className="s-range"
-            />
-            <p className="s-hint">Silence detection delay before finalizing</p>
-          </div>
-        </div>
 
-        <div className="s-card">
-          <div className="s-card-header">
-            <SparkleIcon />
-            <span>LLM Correction</span>
-            <span className="s-badge">Optional</span>
-          </div>
-          <label className="s-toggle-row">
-            <span>Enable LLM transcript correction</span>
-            <div className={`s-switch ${llmEnabled ? "s-switch--on" : ""}`} onClick={() => setLlmEnabled(!llmEnabled)}>
-              <div className="s-switch-thumb" />
+            <div className="s-card">
+              <div className="s-card-header">
+                <MonitorIcon />
+                <span>Caption Display</span>
+              </div>
+              <div className="s-display-grid">
+                <div className="s-display-item">
+                  <span className="s-field-label">Opacity</span>
+                  <div className="s-chip-row">
+                    {[50, 70, 85, 100].map((o) => (
+                      <button key={o} className={`s-chip ${opacity === o ? "s-chip--active" : ""}`} onClick={() => setOpacity(o)}>
+                        {o}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="s-display-item">
+                  <span className="s-field-label">Font Size</span>
+                  <div className="s-chip-row">
+                    {[12, 14, 16, 18, 20].map((o) => (
+                      <button key={o} className={`s-chip ${fontSize === o ? "s-chip--active" : ""}`} onClick={() => setFontSize(o)}>
+                        {o}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <label className="s-toggle-row">
+                <span>Show original text</span>
+                <div className={`s-switch ${showOriginal ? "s-switch--on" : ""}`} onClick={() => setShowOriginal(!showOriginal)}>
+                  <div className="s-switch-thumb" />
+                </div>
+              </label>
+              <div className="s-color-row">
+                <div className="s-color-field">
+                  <span className="s-field-label">Background</span>
+                  <div className="s-color-input">
+                    <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} />
+                    <input type="text" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="input-field s-color-hex" />
+                  </div>
+                </div>
+                <div className="s-color-field">
+                  <span className="s-field-label">Text Color</span>
+                  <div className="s-color-input">
+                    <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} />
+                    <input type="text" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="input-field s-color-hex" />
+                  </div>
+                </div>
+              </div>
             </div>
-          </label>
-          {llmEnabled && (
-            <>
-              <div className="s-field" style={{ marginTop: 8 }}>
-                <span className="s-field-label">API Key</span>
+          </>
+        )}
+
+        {activeTab === "languages" && (
+          <>
+            <div className="s-card">
+              <div className="s-card-header">
+                <GlobeIcon />
+                <span>Languages</span>
+              </div>
+              <div className="s-lang-grid">
+                <div className="s-field">
+                  <span className="s-field-label">Source</span>
+                  <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="select-field">
+                    {LANGUAGES.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="s-arrow">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.35">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </div>
+                <div className="s-field">
+                  <span className="s-field-label">Target</span>
+                  <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="select-field">
+                    {TARGET_LANGUAGES.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="s-card">
+              <div className="s-card-header">
+                <DocIcon />
+                <span>Vocabulary</span>
+                {vocabTerms.length > 0 && <span className="s-badge">{vocabTerms.length}</span>}
+              </div>
+              <div className="s-tag-list">
+                {vocabTerms.map((term, i) => (
+                  <span key={i} className="s-tag">
+                    {term}
+                    <button
+                      className="s-tag-remove"
+                      onClick={() => setVocabTerms(vocabTerms.filter((_, j) => j !== i))}
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="s-key-row" style={{ marginTop: 8 }}>
+                <input
+                  type="text"
+                  value={vocabInput}
+                  onChange={(e) => setVocabInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const term = vocabInput.trim();
+                      if (term && !vocabTerms.includes(term)) {
+                        setVocabTerms([...vocabTerms, term]);
+                        setVocabInput("");
+                      }
+                    }
+                  }}
+                  placeholder="Add term..."
+                  className="input-field"
+                />
+                <button
+                  className="s-icon-btn"
+                  onClick={() => {
+                    const term = vocabInput.trim();
+                    if (term && !vocabTerms.includes(term)) {
+                      setVocabTerms([...vocabTerms, term]);
+                      setVocabInput("");
+                    }
+                  }}
+                >
+                  Add
+                </button>
+              </div>
+              <p className="s-hint">Custom words/names to improve speech recognition accuracy</p>
+            </div>
+          </>
+        )}
+
+        {activeTab === "voice" && (
+          <>
+            <div className="s-card">
+              <div className="s-card-header">
+                <MicIcon />
+                <span>Voice Input</span>
+              </div>
+              <div className="s-field">
+                <span className="s-field-label">Global Shortcut</span>
                 <div className="s-key-row">
                   <input
-                    type={showLlmKey ? "text" : "password"}
-                    value={llmApiKey}
-                    onChange={(e) => setLlmApiKey(e.target.value)}
-                    placeholder="Enter your API key..."
+                    type="text"
+                    value={recordingShortcut ? "Press keys..." : voiceShortcut}
+                    readOnly
                     className="input-field"
-                    autoComplete="off"
+                    onKeyDown={handleShortcutKeyDown}
+                    onFocus={() => recordingShortcut && undefined}
                   />
-                  <button onClick={() => setShowLlmKey(!showLlmKey)} className="s-icon-btn" title="Show/Hide">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      {showLlmKey ? (
-                        <>
-                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                          <line x1="1" y1="1" x2="23" y2="23" />
-                        </>
-                      ) : (
-                        <>
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </>
-                      )}
-                    </svg>
+                  <button
+                    onClick={() => setRecordingShortcut(!recordingShortcut)}
+                    className={`s-icon-btn ${recordingShortcut ? "s-icon-btn--active" : ""}`}
+                    title={recordingShortcut ? "Cancel" : "Record shortcut"}
+                  >
+                    {recordingShortcut ? "Esc" : "Rec"}
                   </button>
                 </div>
               </div>
               <div className="s-field" style={{ marginTop: 8 }}>
-                <span className="s-field-label">Base URL</span>
+                <span className="s-field-label">Stop Word</span>
                 <input
                   type="text"
-                  value={llmBaseUrl}
-                  onChange={(e) => setLlmBaseUrl(e.target.value)}
-                  placeholder="https://api.openai.com/v1"
+                  value={voiceStopWord}
+                  onChange={(e) => setVoiceStopWord(e.target.value)}
+                  placeholder="e.g., thank you"
                   className="input-field"
                 />
+                <p className="s-hint">Say this phrase to end recording (empty = disabled)</p>
               </div>
+              <label className="s-toggle-row" style={{ marginTop: 8 }}>
+                <span>Enter Mode (press Enter after insertion)</span>
+                <div className={`s-switch ${voiceEnterMode ? "s-switch--on" : ""}`} onClick={() => setVoiceEnterMode(!voiceEnterMode)}>
+                  <div className="s-switch-thumb" />
+                </div>
+              </label>
               <div className="s-field" style={{ marginTop: 8 }}>
-                <span className="s-field-label">Model</span>
+                <span className="s-field-label">Endpoint Delay: {voiceEndpointDelay}ms</span>
                 <input
-                  type="text"
-                  value={llmModel}
-                  onChange={(e) => setLlmModel(e.target.value)}
-                  placeholder="gpt-4o-mini"
-                  className="input-field"
+                  type="range"
+                  min={500}
+                  max={3000}
+                  step={100}
+                  value={voiceEndpointDelay}
+                  onChange={(e) => setVoiceEndpointDelay(Number(e.target.value))}
+                  className="s-range"
                 />
+                <p className="s-hint">Silence detection delay before finalizing</p>
               </div>
-              <div className="s-field" style={{ marginTop: 8 }}>
-                <span className="s-field-label">Output Language</span>
-                <select value={llmLanguage} onChange={(e) => setLlmLanguage(e.target.value)} className="select-field">
-                  <option value="auto">Auto (preserve original)</option>
-                  <option value="en">English</option>
-                  <option value="vi">Vietnamese</option>
-                </select>
-              </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
+        {activeTab === "llm" && (
+          <>
+            <div className="s-card">
+              <div className="s-card-header">
+                <SparkleIcon />
+                <span>LLM Correction</span>
+                <span className="s-badge">Optional</span>
+              </div>
+              <label className="s-toggle-row">
+                <span>Enable LLM transcript correction</span>
+                <div className={`s-switch ${llmEnabled ? "s-switch--on" : ""}`} onClick={() => setLlmEnabled(!llmEnabled)}>
+                  <div className="s-switch-thumb" />
+                </div>
+              </label>
+              {llmEnabled && (
+                <>
+                  <div className="s-field" style={{ marginTop: 8 }}>
+                    <span className="s-field-label">API Key</span>
+                    <div className="s-key-row">
+                      <input
+                        type={showLlmKey ? "text" : "password"}
+                        value={llmApiKey}
+                        onChange={(e) => setLlmApiKey(e.target.value)}
+                        placeholder="Enter your API key..."
+                        className="input-field"
+                        autoComplete="off"
+                      />
+                      <button onClick={() => setShowLlmKey(!showLlmKey)} className="s-icon-btn" title="Show/Hide">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          {showLlmKey ? (
+                            <>
+                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                              <line x1="1" y1="1" x2="23" y2="23" />
+                            </>
+                          ) : (
+                            <>
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </>
+                          )}
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="s-field" style={{ marginTop: 8 }}>
+                    <span className="s-field-label">Base URL</span>
+                    <input
+                      type="text"
+                      value={llmBaseUrl}
+                      onChange={(e) => setLlmBaseUrl(e.target.value)}
+                      placeholder="https://api.openai.com/v1"
+                      className="input-field"
+                    />
+                  </div>
+                  <div className="s-field" style={{ marginTop: 8 }}>
+                    <span className="s-field-label">Model</span>
+                    <input
+                      type="text"
+                      value={llmModel}
+                      onChange={(e) => setLlmModel(e.target.value)}
+                      placeholder="gpt-4o-mini"
+                      className="input-field"
+                    />
+                  </div>
+                  <div className="s-field" style={{ marginTop: 8 }}>
+                    <span className="s-field-label">Output Language</span>
+                    <select value={llmLanguage} onChange={(e) => setLlmLanguage(e.target.value)} className="select-field">
+                      <option value="auto">Auto (preserve original)</option>
+                      <option value="en">English</option>
+                      <option value="vi">Vietnamese</option>
+                    </select>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="s-card">
+              <div className="s-card-header">
+                <SubtitleIcon />
+                <span>Subtitle Display</span>
+              </div>
+              <div className="s-display-grid">
+                <div className="s-display-item">
+                  <span className="s-field-label">Font Size</span>
+                  <div className="s-chip-row">
+                    {[20, 24, 28, 32, 36].map((o) => (
+                      <button key={o} className={`s-chip ${subtitleFontSize === o ? "s-chip--active" : ""}`} onClick={() => setSubtitleFontSize(o)}>
+                        {o}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="s-color-row">
+                <div className="s-color-field">
+                  <span className="s-field-label">Background</span>
+                  <div className="s-color-input">
+                    <input type="text" value={subtitleBgColor} onChange={(e) => setSubtitleBgColor(e.target.value)} className="input-field" />
+                  </div>
+                </div>
+                <div className="s-color-field">
+                  <span className="s-field-label">Text Color</span>
+                  <div className="s-color-input">
+                    <input type="color" value={subtitleTextColor} onChange={(e) => setSubtitleTextColor(e.target.value)} />
+                    <input type="text" value={subtitleTextColor} onChange={(e) => setSubtitleTextColor(e.target.value)} className="input-field s-color-hex" />
+                  </div>
+                </div>
+              </div>
+              <label className="s-toggle-row">
+                <span>Show original text</span>
+                <div className={`s-switch ${subtitleShowOriginal ? "s-switch--on" : ""}`} onClick={() => setSubtitleShowOriginal(!subtitleShowOriginal)}>
+                  <div className="s-switch-thumb" />
+                </div>
+              </label>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

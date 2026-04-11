@@ -58,12 +58,13 @@ export function SubtitleApp() {
 				{!hasContent && (
 					<div
 						style={{
-							background: "rgba(0,0,0,0.5)",
-							color: "rgba(255,255,255,0.5)",
+							background: "rgba(255,255,255,0.85)",
+							color: "rgba(0,0,0,0.35)",
 							padding: "4px 14px",
 							fontSize: "14px",
-							fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+							fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
 							borderRadius: "8px",
+							boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
 						}}
 					>
 						Subtitles will appear here...
@@ -77,7 +78,7 @@ export function SubtitleApp() {
 							opacity: 0.65,
 							padding: "2px 14px",
 							fontSize: `${fontSize * 0.75}px`,
-							fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+							fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
 							marginBottom: "4px",
 							display: "inline-block",
 							borderRadius: "8px",
@@ -98,7 +99,7 @@ export function SubtitleApp() {
 									color: textColor,
 									padding: isLast ? "6px 16px" : "4px 12px",
 									fontSize: isLast ? `${fontSize}px` : `${fontSize * 0.7}px`,
-									fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+									fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
 									fontWeight: 500,
 									lineHeight: 1.8,
 									letterSpacing: "0.02em",
